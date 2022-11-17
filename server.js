@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cookieSession = require("cookie-session");
+// const cookieSession = require("cookie-session");
 const cors = require("cors");
 const path = require("path");
 const timeout = require("connect-timeout");
@@ -66,11 +66,11 @@ app.use("/api/admin-coupon", admincoupon);
 app.use("/api/calculations", calculations);
 app.use("/api/driver", driver);
 app.use("/api/pricing", priceplans)
-app.use(
-  cookieSession({
-    secret: "mysecret",
-  })
-);
+// app.use(
+//   cookieSession({
+//     secret: "mysecret",
+//   })
+// );
 
 app.use(express.static(path.join(__dirname, "./build/")));
 app.get("/*", (req, res) => {
