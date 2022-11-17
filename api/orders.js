@@ -6,23 +6,23 @@ const NewRestaurant = require("../models/newrest.model");
 const CurrentOrder = require("../models/currentorders.model")
 const Meals = require("../models/meals.model")
 const pdfTemplate = require("../receipt");
-const pdf = require("html-pdf");
+// const pdf = require("html-pdf");
 const { add } = require('../utility/utility')
 
-router.route("/create-pdf/").post(async (req, res) => {
-  pdf
-    .create(pdfTemplate(req.body), {})
-    .toFile(`${__dirname}/receipt.pdf`, (err) => {
-      if (err) {
-        console.log(err);
-      }
-      res.send(Promise.resolve());
-    });
-});
+// router.route("/create-pdf/").post(async (req, res) => {
+//   pdf
+//     .create(pdfTemplate(req.body), {})
+//     .toFile(`${__dirname}/receipt.pdf`, (err) => {
+//       if (err) {
+//         console.log(err);
+//       }
+//       res.send(Promise.resolve());
+//     });
+// });
 
-router.route("/fetch-pdf").get(async (req, res) => {
-  await res.sendFile(`${__dirname}/receipt.pdf`);
-});
+// router.route("/fetch-pdf").get(async (req, res) => {
+//   await res.sendFile(`${__dirname}/receipt.pdf`);
+// });
 
 router.route("/").get(function (req, res) {
   Order.find(function (err, order) {
