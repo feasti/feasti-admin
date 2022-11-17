@@ -1,15 +1,14 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-// const cookieSession = require("cookie-session");
 const cors = require("cors");
 const path = require("path");
-const timeout = require("connect-timeout");
 require("./database/database");
+// const cookieSession = require("cookie-session");
 // End of important imports
 
 // Start of api imports
-const orders = require("./api/orders");
 //const adminLogin = require("./api/admin-login");
+const orders = require("./api/orders");
 const users = require("./api/users");
 const plan = require("./api/plan");
 const cuisine = require("./api/cuisine");
@@ -41,9 +40,7 @@ app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ limit: "10mb", extended: false }));
 app.use(cors());
 app.use("/api/users", users);
-app.use(timeout("90s"));
 app.use("/api/newrest", newrest);
-app.use(haltOnTimedout);
 app.use("/api/orders", orders);
 app.use("/api/plans", plan);
 app.use("/api/cuisine", cuisine);
@@ -75,11 +72,9 @@ app.use("/api/pricing", priceplans)
 app.use(express.static(path.join(__dirname, "./build/")));
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
+  res.setHeader('Access-Control-Allow-Origin', "*")
+  res.setHeader('Access-Control-Allow-Headers', "application/json")
 });
-
-function haltOnTimedout(req, res, next) {
-  if (!req.timedout) next();
-}
 
 app.listen(port, () => {
   console.warn(`Server started on port ${port}`);
