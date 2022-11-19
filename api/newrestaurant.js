@@ -3,6 +3,7 @@ const router = express.Router();
 const NewRestaurant = require("../models/newrest.model");
 const Meals = require('../models/meals.model')
 const Orders = require("../models/orders.model");
+const Price = require("../models/price_plan.model")
 
 router.route("/").get(async function (req, res) {
   const response = await NewRestaurant.find({})
@@ -81,14 +82,12 @@ router.route("/:id").put(function (req, res, next) {
 
 router.route("/:id").get(async function (req, res) {
   let { id } = req.params;
-  const response = await NewRestaurant.findById(id)
-  const meals = await Meals.find({})
-  let restaurant = response
-  meals.forEach((meal) => {
-    if (restaurant.restaurant_id === meal.restaurant_id) {
-      restaurant.meals = meal.meals
-    }
-  })
+  const restaurant = await NewRestaurant.findById(id)
+  const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+  const { price_plans, isDelivery } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+  restaurant.meals = meals
+  restaurant.isDelivery = isDelivery
+  restaurant.price_plans = price_plans
   res.json(restaurant)
 });
 //get specific restaurant
