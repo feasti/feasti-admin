@@ -3,11 +3,14 @@ const router = express.Router();
 const Plan = require("../models/plans.model");
 
 router.route("/").get(async (req, res) => {
-  const plans = await Plan.find()
+  const plans = await Plan.find({})
   res.json(plans);
 
 });
-
+router.route('/getProfitMargin').get(async (req, res) => {
+  const plans = await Plan.find({}, { plan_name: 1, profit_margin: 1, _id: 0 })
+  res.json(plans)
+})
 router.route("/:id").get(function (req, res) {
   let id = req.params.id;
   Plan.findById(id, function (err, user) {
@@ -31,15 +34,9 @@ router.route("/").post(async (req, res) => {
   res.json(response)
 });
 //update a plan
-router.route("/:id").delete(function (req, res, next) {
-  Plan.findByIdAndDelete(req.params.id, (err, data) => {
-    if (err) {
-      console.log(next(err));
-      res.status(200).json({ data: "deleted" });
-    } else {
-      console.log("deleted_succesfully");
-    }
-  });
+router.route("/:id").delete(async function (req, res, next) {
+  const data = await Plan.findByIdAndDelete(req.params.id)
+  res.json({ msg: "Plan Deleted", data })
 });
 
 module.exports = router;

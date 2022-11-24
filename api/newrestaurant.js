@@ -38,9 +38,14 @@ router.route("/active").get(async function (req, res) {
 //get active restaurants for user
 
 router.route("/login").post(async (req, res) => {
-  const newChef = await NewRestaurant.findOne({ phone: req.body.phone }).exec();
-  if (newChef && newChef.status !== "unapproved") {
-    res.json({ status: 200, data: newChef });
+  let restaurant = await NewRestaurant.findOne({ $and: [{ phone: req.body.phone }, { $ne: { status: 'unapproved' } }] }).exec();
+  const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+  const { price_plans, isDelivery } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+  restaurant.meals = meals
+  restaurant.isDelivery = isDelivery
+  restaurant.price_plans = price_plans
+  if (restaurant) {
+    res.json({ status: 200, data: restaurant });
   } else {
     res.json({ status: 404 });
   }
@@ -116,20 +121,16 @@ router.route("/cuisine_type/:cuisine").get(async function (req, res) {
 router.route("/category/:food").get(async function (req, res) {
   const { food } = req.params;
   const response = await NewRestaurant.find({ $and: [{ status: "Active" }] })
-  const meals = await Meals.find({})
   let restaurants = []
-  response.forEach((restaurant) => {
-    meals.forEach((meal) => {
-      if (restaurant.restaurant_id === meal.restaurant_id) {
-        const { meals } = meal
-        restaurant.meals = meals.find((meal) => meal.category === food).items
-        restaurants.push(restaurant)
-      }
-
-    })
+  response.forEach(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+    restaurant.meals = meals
+    restaurant.price_plans = price_plans
+    restaurants.push(restaurant)
   })
-  res.json(restaurants)
-});
+  res.json(restaurants);
+})
 // filter by lunch dinner
 
 router.route("/meal_type/:meal_type").get(async function (req, res) {
