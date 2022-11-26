@@ -120,16 +120,41 @@ router.route("/cuisine_type/:cuisine").get(async function (req, res) {
 
 router.route("/category/:food").get(async function (req, res) {
   const { food } = req.params;
-  const response = await NewRestaurant.find({ $and: [{ status: "Active" }] })
+  const response = await NewRestaurant.find({ status: "Active" })
   let restaurants = []
   response.forEach(async (restaurant) => {
     const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
-    const { price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
-    restaurant.meals = meals
-    restaurant.price_plans = price_plans
+    const { items } = meals.find(meal => meal.category === food)
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { plans } = price_plans.find((plan) => plan.category === food)
+    restaurant.meals = items
+    restaurant.price_plans = plans
+    restaurant.isDelivery = isDelivery
     restaurants.push(restaurant)
   })
-  res.json(restaurants);
+  setTimeout(() => {
+    res.json(restaurants);
+  }, 8000)
+})
+// filter by lunch dinner
+
+router.route("/filterpickup/:food").get(async function (req, res) {
+  const { food } = req.params;
+  const response = await NewRestaurant.find({ status: "Active" })
+  let restaurants = []
+  response.forEach(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { items } = meals.find(meal => meal.category === food)
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { plans } = price_plans.find((plan) => plan.category === food)
+    restaurant.meals = items
+    restaurant.price_plans = plans
+    restaurant.isDelivery = isDelivery
+    restaurants.push(restaurant)
+  })
+  setTimeout(() => {
+    res.json(restaurants);
+  }, 8000)
 })
 // filter by lunch dinner
 
@@ -144,9 +169,7 @@ router.route("/meal_type/:meal_type").get(async function (req, res) {
 router.route("/price/:order").get(function (req, res) {
   const order = req.params.order;
   NewRestaurant.find(function (err, restaurants) {
-    if (err) {
-      console.log(err);
-    } else {
+    if (!err) {
       function compare(a, b) {
         let p1 = a.plan.twoPlan.base_2price;
         let p2 = b.plan.twoPlan.base_2price;
