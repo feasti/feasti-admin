@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Users = require("../models/users.model");
 const NewRestaurant = require("../models/newrest.model");
+const Meals = require('../models/meals.model')
+const Price = require("../models/price_plan.model")
 
 router.route("/").get(async (req, res) => {
   const users = await Users.find({})
@@ -100,17 +102,24 @@ router.put("/addfavorite/:id", function (req, res) {
 
 router.route("/getfavorite/:id").get(function (req, res, next) {
   const id = req.params.id;
-  Users.findById(id, function (err, user) {
+  Users.findById(id, async function (err, user) {
     if (user) {
       let favorites = user.favorite;
-      console.log(favorites);
-      NewRestaurant.find({ restaurant_name: favorites })
-        .then((favorites) => {
-          return res.json({ status: 200, data: favorites });
-        })
-        .catch((err) => {
-          res.send(err);
-        });
+      const response = await NewRestaurant.find({ restaurant_name: favorites })
+      let restaurants = []
+      response.forEach(async (restaurant) => {
+        const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+        const { items } = meals.find(meal => meal.category === 'Lunch')
+        const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+        const { plans } = price_plans.find((plan) => plan.category === 'Lunch')
+        restaurant.meals = items
+        restaurant.price_plans = plans
+        restaurant.isDelivery = isDelivery
+        restaurants.push(restaurant)
+      })
+      setTimeout(() => {
+        res.json(restaurants);
+      }, 2000)
     } else {
       res.json({ status: 400 });
     }
