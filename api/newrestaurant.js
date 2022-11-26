@@ -25,15 +25,19 @@ router.route("/active").get(async function (req, res) {
   const response = await NewRestaurant.find({ status: "Active" })
   const meals = await Meals.find({})
   let restaurants = []
-  response.forEach((restaurant) => {
-    meals.filter((meal) => {
-      if (restaurant.restaurant_id === meal.restaurant_id) {
-        restaurant.meals = meal.meals
-        restaurants.push(restaurant)
-      }
-    })
+  response.forEach(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { items } = meals.find(meal => meal.category === 'Lunch')
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { plans } = price_plans.find((plan) => plan.category === 'Lunch')
+    restaurant.meals = items
+    restaurant.price_plans = plans
+    restaurant.isDelivery = isDelivery
+    restaurants.push(restaurant)
   })
-  res.json(restaurants)
+  setTimeout(() => {
+    res.json(restaurants);
+  }, 8000)
 });
 //get active restaurants for user
 
