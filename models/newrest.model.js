@@ -82,6 +82,8 @@ let NewRestaurant = new Schema({
       reviews: { type: String },
     },
   ],
+  isDelivery: Boolean,
+  price_plans: Array
 });
 
 module.exports = mongoose.model("NewRestaurant", NewRestaurant);

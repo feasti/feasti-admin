@@ -1,6 +1,4 @@
 const express = require("express");
-//const bodyParser = require(express.json());
-// const cookieSession = require("cookie-session");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
@@ -13,6 +11,7 @@ require("./database/database");
 const orders = require("./api/orders");
 const users = require("./api/users");
 const plan = require("./api/plan");
+const meals = require("./api/meals")
 const cuisine = require("./api/cuisine");
 const checkout = require("./api/checkoutoptions");
 const banner = require("./api/bannerPlan");
@@ -45,6 +44,7 @@ app.use(cors());
 app.use("/api/users", users);
 app.use("/api/newrest", newrest);
 app.use("/api/orders", orders);
+app.use("/api/meals", meals)
 app.use("/api/plans", plan);
 app.use("/api/cuisine", cuisine);
 app.use("/api/checkout", checkout);
