@@ -25,15 +25,19 @@ router.route("/active").get(async function (req, res) {
   const response = await NewRestaurant.find({ status: "Active" })
   const meals = await Meals.find({})
   let restaurants = []
-  response.forEach((restaurant) => {
-    meals.filter((meal) => {
-      if (restaurant.restaurant_id === meal.restaurant_id) {
-        restaurant.meals = meal.meals
-        restaurants.push(restaurant)
-      }
-    })
+  response.forEach(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { items } = meals.find(meal => meal.category === 'Lunch')
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { plans } = price_plans.find((plan) => plan.category === 'Lunch')
+    restaurant.meals = items
+    restaurant.price_plans = plans
+    restaurant.isDelivery = isDelivery
+    restaurants.push(restaurant)
   })
-  res.json(restaurants)
+  setTimeout(() => {
+    res.json(restaurants);
+  }, 8000)
 });
 //get active restaurants for user
 
@@ -112,11 +116,47 @@ router.route("/getchefbyId/:id").get(async (req, res) => {
 
 router.route("/cuisine_type/:cuisine").get(async function (req, res) {
   const { cuisine } = req.params;
-  const restaurants = await NewRestaurant.find({ $and: [{ status: "Active" }, { cuisine_type: cuisine }] })
-  res.json(restaurants)
+  const response = await NewRestaurant.find({ $and: [{ status: "Active" }, { cuisine_type: cuisine }] })
+  let restaurants = []
+  response.forEach(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { items } = meals.find(meal => meal.category === 'Lunch')
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { plans } = price_plans.find((plan) => plan.category === 'Lunch')
+    restaurant.meals = items
+    restaurant.price_plans = plans
+    restaurant.isDelivery = isDelivery
+    restaurants.push(restaurant)
+  })
+  setTimeout(() => {
+    res.json(restaurants);
+  }, 8000)
 
 });
 // filter by cuisine_type
+
+router.route("/searchbycity/:inputcity").get(async function (req, res) {
+  const { inputcity } = req.params;
+  const response = await NewRestaurant.find({ $and: [{ status: "Active" }, { city: inputcity }] })
+  let restaurants = []
+  response.forEach(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { items } = meals.find(meal => meal.category === 'Lunch')
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
+    const { plans } = price_plans.find((plan) => plan.category === 'Lunch')
+    restaurant.meals = items
+    restaurant.price_plans = plans
+    restaurant.isDelivery = isDelivery
+    restaurants.push(restaurant)
+  })
+  setTimeout(() => {
+    res.json(restaurants);
+  }, 8000)
+
+});
+// filter by cuisine_type
+
+
 
 router.route("/category/:food").get(async function (req, res) {
   const { food } = req.params;
