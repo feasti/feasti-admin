@@ -96,7 +96,11 @@ router.route("/cancelled/:restaurant_id").get(async (req, res) => {
 
 router.route("/forchefhome/:restaurant_id/:day/:category").get(async (req, res) => {
   const { restaurant_id, day, category } = req.params
-  let activeorders = await Order.find({ restaurant_id: restaurant_id, $or: [{ status: "accepted" }, { status: "started" }] });
+  let activeorders = await Order.find({
+    restaurant_id: restaurant_id,
+    category: category,
+    $or: [{ status: "accepted" }, { status: "started" }]
+  });
   let orderedAdOns = [].concat.apply(
     [],
     activeorders.flatMap((item) => item.add_on)
