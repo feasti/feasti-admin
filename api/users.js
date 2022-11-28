@@ -207,7 +207,6 @@ router.put("/editaddress/:id", function (req, res) {
 router.put("/addcard/:id", function (req, res) {
   let id = req.params.id;
   let card = req.body.card;
-  console.log(card);
   Users.findById(id, function (err, user) {
     if (user) {
       user.cards.push(card);
