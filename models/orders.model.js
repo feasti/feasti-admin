@@ -18,6 +18,7 @@ let Order = new Schema({
   base_price: { type: String }, //done
   customer_price: String, //done
   tip: { type: String }, //done
+  service_rate:{type:String}, 
   service_fee: { type: String },//done
   delivery_fee: { type: String }, //done
   tax: { type: String }, //done
