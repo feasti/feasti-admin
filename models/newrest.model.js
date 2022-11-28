@@ -9,8 +9,11 @@ let NewRestaurant = new Schema({
   bank_name: { type: String },
   branch_number: { type: String },
   institution_number: { type: String },
+  locality: { type: String },
   city: { type: String },
+  state: { type: String },
   country: { type: String },
+  postal_code: { type: String },
   commission: { type: String },
   cuisine_type: { type: String },
   documents: {
@@ -29,14 +32,14 @@ let NewRestaurant = new Schema({
     },
   ],
   email: { type: String },
-  locality: { type: String },
+
   owner_name: { type: String },
-  postal_code: { type: String },
+
   phone: { type: String },
   base_2price: { type: String },
   base_15price: { type: String },
   base_30price: { type: String },
-  state: { type: String },
+
   restaurant_name: { type: String },
   status: { type: String, default: "Inactive" },
   meals: {

@@ -2,36 +2,37 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 let Order = new Schema({
-  order_id: { type: String },
-  user_name: { type: String },
-  phone: { type: String },
-  email_id: { type: String },
-  address: { type: Object },
-  card: { type: Object },
-  user_id: { type: String },
-  start_date: { type: String },
-  end_date: { type: String },
-  restaurant_id: { type: String },
-  restaurant: { type: String },
+  order_id: { type: String },//auto
+  user_name: { type: String },//done
+  phone: { type: String }, //done
+  email_id: { type: String }, //done
+  address: { type: Object }, //done
+  card: { type: Object }, //done
+  user_id: { type: String }, //done
+  start_date: { type: String }, //done
+  end_date: { type: String }, //done
+  restaurant_id: { type: String }, //done
+  restaurant: { type: String }, //done
   restaurant_image: { type: String },
+  plan_name: { type: String }, //done
+  base_price: { type: String }, //done
+  customer_price: String, //done
+  tip: { type: String }, //done
+  service_fee: { type: String },//done
+  delivery_fee: { type: String }, //done
+  tax: { type: String }, //done
+  taxes: { type: String }, //done
+  total: { type: String },//done
+  time: { type: String }, //done
+  notes: { type: String }, //done
+  category: { type: String }, //done
+  meal_type: { type: String },//done
+  restaurant_address: { type: Object },
   plan: { type: String },
-  plan_name: { type: String },
-  base_price: { type: String },
-  customer_price: String,
   price: { type: String },
-  tip: { type: String },
-  service_fee: { type: String },
-  delivery_fee: { type: String },
-  tax: { type: String },
-  taxes: { type: String },
   promo_code: { type: String },
   promo_id: { type: String },
   discount: { type: String },
-  total: { type: String },
-  time: { type: String },
-  notes: { type: String },
-  category: { type: String },
-  meal_type: { type: String },
   meals: { type: Array },
   isDelivery: { type: Boolean },
   order_time: {
