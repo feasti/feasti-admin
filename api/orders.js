@@ -226,16 +226,13 @@ router.route("/:id").delete(async (req, res) => {
 });
 //delete single order
 
-router.route("/").post(function (req, res) {
-  let order = new Order(req.body);
-  order
-    .save()
-    .then((response) => {
-      res.json({ data: response, msg: "Order Placed!!!", status: 200 });
-    })
-    .catch((err) => {
-      res.status(400).send("Failed");
-    });
+router.route("/").post(async function (req, res) {
+  const { orderToPlace } = req.body
+  const count = await Order.count()
+  const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
+  const order = new Order({ ...orderToPlace, order_id: orderId })
+  const response = await order.save()
+  res.json({ data: response, msg: "Order Placed!!!", status: 200 });
 });
 //save a order
 
