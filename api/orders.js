@@ -118,7 +118,7 @@ router.route("/forchefhome/:restaurant_id/:day/:category").get(async (req, res) 
   let filtered_add_ons = [];
   let add_on_name = [];
   let total_ad_on = 0;
-  if (req.params.day === "Today") {
+  if (day === "Today") {
     const today = moment();
     activeorders = activeorders.filter((item) =>
       today.isBetween(item.start_date, moment(item.end_date).add(1, "day"))
@@ -129,27 +129,7 @@ router.route("/forchefhome/:restaurant_id/:day/:category").get(async (req, res) 
     type = meal.type;
     add_on = meal.add_on;
     add_on_name = Array.isArray(add_on) && add_on.length !== 0 ? add_on.map((data) => data.add_on) : [];
-    // add_on_name.forEach((add_on) =>
-    //   filtered_add_ons.push(
-    //     orderedAdOns
-    //       .filter(
-    //         (item) =>
-    //           item.item === add_on &&
-    //           item.order_date === moment().format("DD-MMM-YYYY")
-    //       )
-    //       .map((item) => item.qty)
-    //       .reduce(add, 0)
-    //   )
-    // );
-    // total_ad_on = filtered_add_ons.reduce(add, 0);
-    // add_on_name.forEach((element, index) => {
-    //   let obj = {
-    //     add_on_name: add_on_name[index],
-    //     qty: filtered_add_ons[index],
-    //   };
-    //   add_ons_orders.push(obj);
-    // });
-  } else if (req.params.day === "Tomorrow") {
+  } else if (day === "Tomorrow") {
     const today = moment().add(1, "days");
     activeorders = activeorders.filter((item) =>
       today.isBetween(item.start_date, moment(item.end_date).add(1, "day"))
@@ -160,26 +140,6 @@ router.route("/forchefhome/:restaurant_id/:day/:category").get(async (req, res) 
     type = meal.type;
     add_on = meal.add_on;
     add_on_name = Array.isArray(add_on) && add_on.length !== 0 ? add_on.map((data) => data.add_on) : [];
-    // add_on_name.forEach((add_on) =>
-    //   filtered_add_ons.push(
-    //     orderedAdOns
-    //       .filter(
-    //         (item) =>
-    //           item.item === add_on &&
-    //           item.order_date === moment().format("DD-MMM-YYYY")
-    //       )
-    //       .map((item) => item.qty)
-    //       .reduce(add, 0)
-    //   )
-    // );
-    // total_ad_on = filtered_add_ons.reduce(add, 0);
-    // add_on_name.forEach((element, index) => {
-    //   let obj = {
-    //     add_on_name: add_on_name[index],
-    //     qty: filtered_add_ons[index],
-    //   };
-    //   add_ons_orders.push(obj);
-    // });
   } else {
     const today = moment().add(2, "days");
     activeorders = activeorders.filter((item) =>
@@ -191,29 +151,8 @@ router.route("/forchefhome/:restaurant_id/:day/:category").get(async (req, res) 
     type = meal.type;
     add_on = meal.add_on;
     add_on_name = Array.isArray(add_on) && add_on.length !== 0 ? add_on.map((data) => data.add_on) : [];
-    // add_on_name.forEach((add_on) =>
-    //   filtered_add_ons.push(
-    //     orderedAdOns
-    //       .filter(
-    //         (item) =>
-    //           item.item === add_on &&
-    //           item.order_date === moment().format("DD-MMM-YYYY")
-    //       )
-    //       .map((item) => item.qty)
-    //       .reduce(add, 0)
-    //   )
-    // );
-    // total_ad_on = filtered_add_ons.reduce(add, 0);
-    // add_on_name.forEach((element, index) => {
-    //   let obj = {
-    //     add_on_name: add_on_name[index],
-    //     qty: filtered_add_ons[index],
-    //   };
-    //   add_ons_orders.push(obj);
-    // });
   }
   res.json({
-    // activeorders: activeorders,
     count: count,
     meal_name: meal_name,
     add_ons: add_on_name,
