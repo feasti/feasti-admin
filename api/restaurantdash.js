@@ -4,8 +4,57 @@ const NewRestaurant = require("../models/newrest.model");
 const Orders = require("../models/orders.model");
 const Banner = require("../models/banners.model");
 const Users = require("../models/users.model");
+const Plan = require("../models/price_plan.model")
 
-const RestaurantDashboard = require("../models/restaurant_dashboard.model");
+const add = (accumulator, curr) => parseFloat(accumulator) + parseFloat(curr);
+
+// Chef Dashboard Data
+router.route("/:restaurant_id").get(async (req, res) => {
+  const { restaurant_id } = req.params
+
+  const myorders = await Orders.find({ restaurant_id: restaurant_id });
+  const { price_plans } = await Plan.findOne({ restaurant_id: restaurant_id })
+  const { plans } = price_plans[0]
+
+  const totalorders = myorders.length; //Total Orders
+
+  let accepted = myorders.filter((item) => item.status === "accepted");
+  let mealCount = plans.forEach((plan, index) => {
+    myorders.filter((order,index)=>order.plan_name===plan.plan_name)
+  })
+
+
+
+  const pending = myorders.filter((item) => item.status === "pending");
+
+  let started = myorders.filter((item) => item.status === "started");
+
+  const completed = myorders.filter((item) => item.status === "completed");
+
+  const cancelled = myorders.filter((item) => item.status === "cancelled");
+  const rejected = myorders.filter((item) => item.status === "rejected");
+
+  const acceptedCount = accepted.length;
+  const pendingCount = pending.length;
+  const startedCount = started.length;
+  const completedCount = completed.length;
+  const cancelledCount = cancelled.length;
+  const rejectedCount = rejected.length;
+  const acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
+  const rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
+  res.json({
+    mealCount,
+    totalorders,
+    acceptedCount,
+    pendingCount,
+    startedCount,
+    completedCount,
+    cancelledCount,
+    rejectedCount,
+    acceptanceRate,
+    rejectanceRate
+  });
+});
 
 router.route("/getusertypesbyrestaurant/:restaurant").get(async (req, res) => {
   const { restaurant } = req.params;
@@ -43,44 +92,6 @@ router.route("/").post(function (req, res) {
     });
 });
 //create a dashboard
-
-router.route("/:restaurant_id").get(async (req, res) => {
-  let myorders = await Orders.find({
-    restaurant_id: req.params.restaurant_id,
-  });
-  const add = (accumulator, curr) => parseFloat(accumulator) + parseFloat(curr);
-  let totalorders = myorders.length;
-  let accepted = myorders.filter((item) => item.status === "accepted");
-  let started = myorders.filter((item) => item.status === "started");
-  let completed = myorders.filter((item) => item.status === "completed");
-  let cancelled = myorders.filter((item) => item.status === "cancelled");
-  let rejected = myorders.filter((item) => item.status === "rejected");
-  let acceptedCount = accepted.length;
-  let startedCount = started.length;
-  let completedCount = completed.length;
-  let cancelledCount = cancelled.length;
-  let rejectedCount = rejected.length;
-  await RestaurantDashboard.findOne(
-    { restaurant_id: req.params.restaurant_id },
-    function (err, dashboard) {
-      let { banners } = dashboard;
-      let dues = banners.map((item) => item.due);
-      let dueAmt = dues.reduce(add, 0);
-      res.json({
-        totalOrders: totalorders,
-        acceptedCount: acceptedCount,
-        rejectedCount: rejectedCount,
-        accptanceRate:
-          ((acceptedCount + startedCount + completedCount + cancelledCount) /
-            totalorders) *
-          100,
-        rectanceRate: (rejectedCount / totalorders) * 100,
-        dashboard: dashboard,
-        due: dueAmt,
-      });
-    }
-  );
-});
 
 router.route("/:restaurant_name/:id").put(async (req, res) => {
   const { id } = req.params;

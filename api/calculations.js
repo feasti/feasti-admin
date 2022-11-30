@@ -64,15 +64,14 @@ router.route("/revenue").get(async function (req, res) {
       { status: "accepted" },
     ],
   });
-  let mealrevenue = neworders.map((item) => item.price);
+  let mealrevenue = neworders.map((item) => item.total);
   mealrevenue = mealrevenue.reduce(add, 0); //meal revenue
   let baserevenue = neworders.map((item) => item.base_price);
   baserevenue = baserevenue.reduce(add, 0); //base revenue
-  let totaldelivery = neworders.map((item) => item.delivery_fee);
+  let totaldelivery = neworders.filter((item) => item.delivery_fee !== "N/A")
+  totaldelivery = totaldelivery.map((item) => item.delivery_fee);
   totaldelivery = totaldelivery.reduce(add, 0); //Delivery revenue
-  let totalservicefee = neworders.map(
-    (item) => item.service_fee * 0.01 * item.price
-  );
+  let totalservicefee = neworders.map((item) => item.service_fee);
   totalservicefee = totalservicefee.reduce(add, 0); //Service Revenue
   let profits = await profit_margins.find();
   let commission_array = await commissions.find();
