@@ -37,8 +37,8 @@ const priceplans = require("./api/price_plans")
 const app = express();
 const port = process.env.PORT || 4000;
 
-//app.use(bodyParser.json({ limit: "10mb" }));
-//app.use(bodyParser.urlencoded({ limit: "10mb", extended: false }));
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: false }));
 app.use(express.json())
 app.use(cors());
 app.use("/api/users", users);
