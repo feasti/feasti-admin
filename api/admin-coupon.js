@@ -51,14 +51,9 @@ router.route("/:id").put(async (req, res) => {
 });
 // update a coupon
 
-router.route("/getcouponforuser").get(function (req, res) {
-    Coupon.find(function (err, coupons) {
-        if (err) {
-            res.json(err);
-        } else {
-            res.json(coupons);
-        }
-    });
+router.route("/getcouponforuser/").get(async function (req, res) {
+    const coupons = await Coupon.find({})
+    res.json(coupons)
 });
 //get all coupons
 
