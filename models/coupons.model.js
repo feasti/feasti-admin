@@ -12,9 +12,11 @@ let Coupon = new Schema({
   deactivation_date: { type: String },
   end_date: { type: String },
   promo_code: { type: String },
+  promo_text: { type: String },
   price: { type: String },
   discount: { type: String },
   duration: { type: String },
+  isAdmin: { type: Boolean, default: true },
   status: { type: String, default: "Active" },
 });
 
