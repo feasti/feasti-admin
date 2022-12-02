@@ -31,7 +31,7 @@ router.route("/active").get(async function (req, res) {
     const { items } = meals.find(meal => meal.category === 'Lunch')
     const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
     const { plans } = price_plans.find((plan) => plan.category === 'Lunch')
-    const promo = await Coupon.findOne({ $and: [{ restaurant_id: restaurant_id }, { status: "Active" }] })
+    const promo = await Coupon.findOne({ $and: [{ restaurant_id: restaurant.restaurant_id }, { status: "Active" }] })
     restaurant.meals = items
     restaurant.price_plans = plans
     restaurant.isDelivery = isDelivery
