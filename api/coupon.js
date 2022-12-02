@@ -1,17 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const Coupon = require("../models/coupons.model");
-const Promo = require("../models/promo.model");
 const Orders = require("../models/orders.model");
 
-router.route("/").get(function (req, res) {
-  Coupon.find(function (err, coupons) {
-    if (err) {
-      res.json(err);
-    } else {
-      res.json(coupons);
-    }
-  });
+router.route("/").get(async function (req, res) {
+  const response = await Coupon.find({})
+  res.json(response)
 });
 //get all coupons
 
@@ -24,6 +18,17 @@ router.route("/:id").get(function (req, res) {
   });
 });
 //get specific coupon
+
+router.route("/").post(async function (req, res) {
+  const count = await Coupon.count()
+  let coupon = new Coupon(req.body);
+  const { isAdmin } = coupon
+  const promoId = isAdmin ? "PROMOADMIN" : "PROMO".concat(count.toString().padStart(4, "0"))
+  coupon.promo_id = promoId
+  const response = await coupon.save()
+  res.json({ status: 200, data: response, msg: "Done" });
+});
+//save a singe coupon to database
 
 router.route("/getcouponforchef/:restaurant/:status").get(async (req, res) => {
   const myCoupons = await Coupon.find({
@@ -81,42 +86,8 @@ router.route("/:id").put(async (req, res) => {
   res.json(response);
 });
 
-router.route("/promo/:promo_id").get(function (req, res) {
-  Promo.find({ promo_id: req.params.promo_id }, function (err, promo) {
-    if (!err) {
-      res.json({ status: 200, data: promo, msg: "Coupons Fetched" });
-    }
-  });
-});
-//get promo used by user
 
-router.route("/add_promo").post(function (req, res) {
-  let promo = new Promo(req.body);
-  promo
-    .save()
-    .then((response) => response)
-    .then((data) => {
-      res.json({ status: 200, data: data, msg: "Done" });
-    })
-    .catch((err) => {
-      res.json({ status: 200, data: err, msg: "Applying coupon failed" });
-    });
-});
-//register a promo
 
-router.route("/").post(function (req, res) {
-  let coupon = new Coupon(req.body);
-  coupon
-    .save()
-    .then((coupon) => coupon)
-    .then((coupon) => {
-      res.json({ status: 200, data: coupon, msg: "Done" });
-    })
-    .catch((err) => {
-      res.status(400).send("adding new Client failed");
-    });
-});
-//save a singe coupon to database
 
 router.route("/:id").delete((req, res, next) => {
   Coupon.findByIdAndDelete(req.params.id, (err, data) => {
