@@ -11,7 +11,7 @@ router.route("/").get(async (req, res) => {
 
 router.route("/active").get(async (req, res) => {
   let allRestaurants = await Restaurants.find();
-  let allBanners = await Promo.find({status:"active"});
+  let allBanners = await Promo.find({ status: "active" });
   let promoted_restaurants = [];
   for (let i = 0; i < allRestaurants.length; i++) {
     for (let j = 0; j < allBanners.length; j++) {
@@ -27,8 +27,9 @@ router.route("/active").get(async (req, res) => {
 });
 //get banners for users
 
-router.route("/:restaurant_id").get(async (req, res) => {
-  const banner = await Promo.find({ restaurant_id: req.params.restaurant_id });
+router.route("/:restaurant_id/:status").get(async (req, res) => {
+  const { restaurant_id, status } = req.params
+  const banner = await Promo.find({ restaurant_id: restaurant_id, status: status });
   res.json(banner);
 });
 
