@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
+const timeout=require("connect-timeout");
 require("./database/database");
 // const cookieSession = require("cookie-session");
 // End of important imports
@@ -37,12 +38,14 @@ const priceplans = require("./api/price_plans")
 const app = express();
 const port = process.env.PORT || 4000;
 
-app.use(bodyParser.json({ limit: "10mb" }));
-app.use(bodyParser.urlencoded({ limit: "10mb", extended: false }));
+app.use(bodyParser({limit:"50mb"}));
+app.use(bodyParser.json({ limit: "100mb" }));
+app.use(bodyParser.urlencoded({ limit: "100mb", extended: false }));
 app.use(express.json())
 app.use(cors());
 app.use("/api/users", users);
 app.use("/api/newrest", newrest);
+app.use(timeout("90s"))
 app.use("/api/orders", orders);
 app.use("/api/meals", meals)
 app.use("/api/plans", plan);
