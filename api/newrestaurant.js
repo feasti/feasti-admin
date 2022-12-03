@@ -73,7 +73,7 @@ router.route("/").post(async function (req, res) {
   let restaurant = new NewRestaurant(req.body);
   const response = await restaurant.save()
   res.json({
-    data: restaurant,
+    data: response,
     status: 200,
     msg: "Restaurant Added Successfully",
   });
