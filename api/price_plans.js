@@ -38,7 +38,7 @@ router.put('/updateforchef/:restaurant_id', async (req, res) => {
     let planToUpdate = price_plans.find((plan) => plan.category === category)
     const { profit_margin } = await Plan.findOne({ plan_name: planToUpdate.plans[index].plan_name })
     planToUpdate.plans[index].base_price = base_price
-    planToUpdate.plans[index].customer_price = add(base_price, profit_margin)
+    planToUpdate.plans[index].customer_price = add(base_price, profit_margin).toString()
     existingPlans[existingPlans.findIndex(x => x.category === category)] = planToUpdate
     const response = await PricePlans.findByIdAndUpdate(_id, { price_plans: existingPlans })
 
