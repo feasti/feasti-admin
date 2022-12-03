@@ -26,6 +26,7 @@ const payoutcycle = require("./api/payoutcycle");
 const plan = require("./api/plan");
 const policies = require("./api/policies");
 const priceplans = require("./api/price_plans")
+const promo = require('./api/promotions')
 const review = require("./api/reviews");
 const slot = require("./api/slots");
 const stripeintent = require("./api/stripe");
@@ -61,6 +62,7 @@ app.use("/api/payoutcycle", payoutcycle);
 app.use("/api/plans", plan);
 app.use("/api/policies", policies);
 app.use("/api/pricing", priceplans)
+app.use("/api/promo", promo)
 app.use("/api/review", review);
 app.use("/api/slots", slot);
 app.use("/api/stripe", stripeintent);

@@ -27,18 +27,26 @@ router.put("/:id", async (req, res) => {
 //Update a plan
 
 
-router.put('/updatefromchef/:restaurant_id', async (req, res) => {
+router.put('/updateforchef/:restaurant_id', async (req, res) => {
+    function add(accumulator, a) {
+        return parseFloat(accumulator) + parseFloat(a);
+    }
     const { restaurant_id } = req.params
-    const { plans, category, index } = req.body
-    let { price_plans, isDelivery } = await PricePlans.findOne({ restaurant_id: restaurant_id })
-    let margins = await Plan.find({})
+    const { base_price, category, index } = req.body
+    let { price_plans, isDelivery, _id } = await PricePlans.findOne({ restaurant_id: restaurant_id })
+    let existingPlans = [...price_plans]
     let planToUpdate = price_plans.find((plan) => plan.category === category)
+    const { profit_margin } = await Plan.findOne({ plan_name: planToUpdate.plans[index].plan_name })
+    planToUpdate.plans[index].base_price = base_price
+    planToUpdate.plans[index].customer_price = add(base_price, profit_margin)
+    existingPlans[existingPlans.findIndex(x => x.category === category)] = planToUpdate
+    const response = await PricePlans.findByIdAndUpdate(_id, { price_plans: existingPlans })
+
     // planToUpdate.plans = plans
 
     res.json({
-        restaurant_id,
-        plans: planToUpdate.plans[index],
-        margins
+        response,
+        msg: "Plan Updated Successfully"
     })
 
 })
