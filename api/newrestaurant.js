@@ -444,7 +444,11 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
       + thirtyDiscount
 
     )
-
+  let totalRevenue = parseFloat(singleMealRevenue
+    + twoMealRevenue
+    + sevenMealRevenue
+    + fifteenMealRevenue
+    + thirtyMealRevenue)
   const acceptedCount = accepted.length;
   const pendingCount = pending.length;
   const startedCount = started.length;
@@ -455,6 +459,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
   res.json({
     totalSales,
+    totalRevenue,
     allRevenue,
     totalorders,
     acceptedCount,
