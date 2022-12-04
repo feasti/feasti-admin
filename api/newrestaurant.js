@@ -295,7 +295,7 @@ router.route("/getorders/:restaurant_id").get(async (req, res) => {
 router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const { restaurant_id } = req.params
   const myorders = await Orders.find({ restaurant_id: restaurant_id });
-  const { price_plans } = await Price.findOne({ restaurant_id: restaurant_id })
+  const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant_id })
   const { plans } = price_plans[0]
   const totalorders = myorders.length; //Total Orders
 
