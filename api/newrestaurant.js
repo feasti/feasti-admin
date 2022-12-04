@@ -121,7 +121,7 @@ router.route("/getchefbyId/:id").get(async (req, res) => {
     plan_name: meal_plan
   }
   response.isDelivery = isDelivery
-  response.meals = items
+  response.meals = meals
   response.price_plans = plans
   response.promo.push(coupon)
   res.json(response);
