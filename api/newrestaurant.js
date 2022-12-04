@@ -353,7 +353,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   revenue = {
     plan_name: "1 Meal",
     revenue: singleMealRevenue,
-    delivery_fee: singleDeliveryFee!==null ?singleDeliveryFee:0,
+    delivery_fee: singleDeliveryFee !== null ? singleDeliveryFee : 0,
     discount: singleDiscount
   }
   allRevenue.push(revenue)
@@ -368,7 +368,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   revenue = {
     plan_name: "2 Meals",
     revenue: twoMealRevenue,
-    delivery_fee: twoDeliveryFee !== null ? twoDeliveryFee:0,
+    delivery_fee: twoDeliveryFee !== null ? twoDeliveryFee : 0,
     discount: twoDiscount
   }
   allRevenue.push(revenue)
@@ -382,7 +382,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   revenue = {
     plan_name: "7 Meals",
     revenue: sevenMealRevenue,
-    delivery_fee: sevenDeliveryFee !== null ? sevenDeliveryFee:0,
+    delivery_fee: sevenDeliveryFee !== null ? sevenDeliveryFee : 0,
     discount: sevenDiscount
   }
   allRevenue.push(revenue)
@@ -396,7 +396,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   revenue = {
     plan_name: "15 Meals",
     revenue: fifteenMealRevenue,
-    delivery_fee: fifteenDeliveryFee !== null ? fifteenDeliveryFee:0,
+    delivery_fee: fifteenDeliveryFee !== null ? fifteenDeliveryFee : 0,
     discount: fifteenDiscount
   }
   allRevenue.push(revenue)
@@ -410,14 +410,10 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   revenue = {
     plan_name: "30 Meals",
     revenue: thirtyMealRevenue,
-    delivery_fee: thirtyDeliveryFee !== null ? thirtyDeliveryFee:0,
+    delivery_fee: thirtyDeliveryFee !== null ? thirtyDeliveryFee : 0,
     discount: thirtyDiscount
   }
   allRevenue.push(revenue)
-
-
-
-
 
   const pending = myorders.filter((item) => item.status === "pending");
   let started = myorders.filter((item) => item.status === "started");
