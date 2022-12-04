@@ -9,50 +9,7 @@ const Plan = require("../models/price_plan.model")
 const add = (accumulator, curr) => parseFloat(accumulator) + parseFloat(curr);
 
 // Chef Dashboard Data
-router.route("/:restaurant_id").get(async (req, res) => {
-  const { restaurant_id } = req.params
-  const myorders = await Orders.find({ restaurant_id: restaurant_id });
-  const { price_plans } = await Plan.findOne({ restaurant_id: restaurant_id })
-  const { plans } = price_plans[0]
-  const totalorders = myorders.length; //Total Orders
 
-  let accepted = myorders.filter((item) => item.status === "accepted");
-  let mealCount = plans.forEach((plan, index) => {
-    myorders.filter((order,index)=>order.plan_name===plan.plan_name)
-  })
-
-
-
-  const pending = myorders.filter((item) => item.status === "pending");
-
-  let started = myorders.filter((item) => item.status === "started");
-
-  const completed = myorders.filter((item) => item.status === "completed");
-
-  const cancelled = myorders.filter((item) => item.status === "cancelled");
-  const rejected = myorders.filter((item) => item.status === "rejected");
-
-  const acceptedCount = accepted.length;
-  const pendingCount = pending.length;
-  const startedCount = started.length;
-  const completedCount = completed.length;
-  const cancelledCount = cancelled.length;
-  const rejectedCount = rejected.length;
-  const acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
-  const rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
-  res.json({
-    mealCount,
-    totalorders,
-    acceptedCount,
-    pendingCount,
-    startedCount,
-    completedCount,
-    cancelledCount,
-    rejectedCount,
-    acceptanceRate,
-    rejectanceRate
-  });
-});
 
 router.route("/getusertypesbyrestaurant/:restaurant").get(async (req, res) => {
   const { restaurant } = req.params;
