@@ -8,7 +8,7 @@ let AdminCoupon = new Schema({
     discount: { type: String },
     orders: { type: String },
     isAdmin: { type: Boolean, default: true },
-    discount_type: { type: Boolean },
+    discount_type: { type: String },
     isDelivery: { type: Boolean },
     status: { type: String, default: "Active" },
 });
