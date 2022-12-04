@@ -11,11 +11,9 @@ const add = (accumulator, curr) => parseFloat(accumulator) + parseFloat(curr);
 // Chef Dashboard Data
 router.route("/:restaurant_id").get(async (req, res) => {
   const { restaurant_id } = req.params
-
   const myorders = await Orders.find({ restaurant_id: restaurant_id });
   const { price_plans } = await Plan.findOne({ restaurant_id: restaurant_id })
   const { plans } = price_plans[0]
-
   const totalorders = myorders.length; //Total Orders
 
   let accepted = myorders.filter((item) => item.status === "accepted");
@@ -131,12 +129,10 @@ router.route("/getchefbyidandrevenue/:id").get(async (req, res) => {
     ],
   });
   let prices = myOrders.map((item) => item.base_price);
-  const adder = (accumulator, curr) =>
-    parseFloat(accumulator) + parseFloat(curr);
-  let revenue = prices.reduce(adder, 0);
+  let revenue = prices.reduce(add, 0);
 
   let discounts = myOrders.map((item) => item.discount);
-  let discount = discounts.reduce(adder, 0);
+  let discount = discounts.reduce(add, 0);
 
   const userids = myOrders.map((item) => item.user_id);
   let uniq = [...new Set(userids)];

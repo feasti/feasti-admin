@@ -5,6 +5,7 @@ const Meals = require('../models/meals.model')
 const Orders = require("../models/orders.model");
 const Price = require("../models/price_plan.model")
 const Coupon = require('../models/coupons.model')
+const Banner = require("../models/banners.model")
 
 router.route("/").get(async function (req, res) {
   const response = await NewRestaurant.find({})
@@ -105,17 +106,21 @@ router.route("/:id").get(async function (req, res) {
 //get specific restaurant
 
 router.route("/getchefbyId/:id").get(async (req, res) => {
-  const response = await NewRestaurant.findOne({ restaurant_id: req.params.id })
-  const meals = await Meals.find({})
-  let restaurant = response
-  meals.forEach((meal) => {
-    if (meal.restaurant_id === restaurant.restaurant_id) {
-      restaurant.meals = meal.meals
-    }
-  })
-  res.json(restaurant);
+  const { id } = req.params
+  const response = await NewRestaurant.findOne({ restaurant_id: id })
+  const { meals } = await Meals.findOne({ restaurant_id: id })
+  const { items } = meals.find((meal) => meal.category === "Lunch")
+  const { price_plans, isDelivery } = await Price.findOne({ restaurant_id: id })
+  const { plans } = price_plans.find((price_plan) => price_plan.category === "Lunch")
+  const { promo_code, discount_type, discount } = await Banner.findOne({ restaurant_id: id })
+  const coupon = { promo_code, discount_type, discount, isDelivery: false }
+  response.isDelivery = isDelivery
+  response.meals = items
+  response.price_plans = plans
+  response.promo.push(coupon)
+  res.json(response);
 });
-//get specific restaurant
+//get specific restaurant by chef ID
 
 router.route("/cuisine_type/:cuisine").get(async function (req, res) {
   const { cuisine } = req.params;
