@@ -267,15 +267,13 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
       },
     ],
   });
-  const dashboard = await RestaurantDashboard.findOne({
-    restaurant_id: req.params.rest_id,
-  });
   const restaurantDetails = await NewRestaurant.findOne({
     restaurant_id: req.params.rest_id,
   });
   const transaction = await Transaction.find({
     restaurant_id: req.params.rest_id,
   });
+  let banners = await Banners.find({ restaurant_id: req.params.rest_id });
   let pp = pastpayouts.map((item) => {
     let sd = item.start_date;
     let nd = item.end_date;
@@ -346,7 +344,7 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
       .map((order) => order.discount);
     let totalDiscount = discounts.reduce(add, 0);
     let AdOnsCommission = totalAddOnRevenue * 0.1;
-    let { banners } = dashboard;
+ 
     let dues = banners
       .filter(
         (item) =>
