@@ -427,6 +427,24 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const cancelled = myorders.filter((item) => item.status === "cancelled");
   const rejected = myorders.filter((item) => item.status === "rejected");
 
+  let totalSales = parseFloat(singleMealRevenue
+    + twoMealRevenue
+    + sevenMealRevenue
+    + fifteenMealRevenue
+    + thirtyMealRevenue)
+    + parseFloat(singleDeliveryFee
+      + twoDeliveryFee
+      + sevenDeliveryFee
+      + fifteenDeliveryFee
+      + thirtyDeliveryFee)
+    - parseFloat(singleDiscount
+      + twoDiscount
+      + sevenDiscount
+      + fifteenDiscount
+      + thirtyDiscount
+
+    )
+
   const acceptedCount = accepted.length;
   const pendingCount = pending.length;
   const startedCount = started.length;
@@ -436,6 +454,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
   const rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
   res.json({
+    totalSales,
     allRevenue,
     totalorders,
     acceptedCount,
