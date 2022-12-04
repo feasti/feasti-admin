@@ -112,7 +112,7 @@ router.route("/getchefbyId/:id").get(async (req, res) => {
   const { items } = meals.find((meal) => meal.category === "Lunch")
   const { price_plans, isDelivery } = await Price.findOne({ restaurant_id: id })
   const { plans } = price_plans.find((price_plan) => price_plan.category === "Lunch")
-  const { promo_code, discount_type, discount } = await Banner.findOne({ restaurant_id: id })
+  const { promo_code, discount_type, discount, meal_plan } = await Banner.findOne({ restaurant_id: id })
   const coupon = {
     promo_code,
     discount_type,
