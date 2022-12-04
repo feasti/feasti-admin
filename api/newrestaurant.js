@@ -342,18 +342,20 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
       thirtyMeals.push(planwiseorder)
     }
   })
+
   let allRevenue = []
   let revenue = {}
   let singelMealBasePrice = singleMeals.map((item) => item.base_price);
   let singleMealRevenue = singelMealBasePrice.reduce(add, 0);
   let singelMealDelivery = singleMeals.map((item) => item.delivery_fee);
+  singelMealDelivery = singelMealDelivery.filter((x) => Number(x))
   let singleDeliveryFee = singelMealDelivery.reduce(add, 0);
   let singelMealDiscount = singleMeals.map((item) => item.discount);
   let singleDiscount = singelMealDiscount.reduce(add, 0);
   revenue = {
     plan_name: "1 Meal",
     revenue: singleMealRevenue,
-    delivery_fee: singleDeliveryFee !== null ? singleDeliveryFee : 0,
+    delivery_fee: singleDeliveryFee,
     discount: singleDiscount
   }
   allRevenue.push(revenue)
@@ -362,13 +364,14 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   let twoMealBasePrice = twoMeals.map((item) => item.base_price);
   let twoMealRevenue = twoMealBasePrice.reduce(add, 0);
   let twoMealDelivery = twoMeals.map((item) => item.delivery_fee);
+  twoMealDelivery = twoMealDelivery.filter((x) => Number(x))
   let twoDeliveryFee = twoMealDelivery.reduce(add, 0);
   let twoMealDiscount = twoMeals.map((item) => item.discount);
   let twoDiscount = twoMealDiscount.reduce(add, 0);
   revenue = {
     plan_name: "2 Meals",
     revenue: twoMealRevenue,
-    delivery_fee: twoDeliveryFee !== null ? twoDeliveryFee : 0,
+    delivery_fee: twoDeliveryFee,
     discount: twoDiscount
   }
   allRevenue.push(revenue)
@@ -376,13 +379,14 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   let sevenMealBasePrice = sevenMeals.map((item) => item.base_price);
   let sevenMealRevenue = sevenMealBasePrice.reduce(add, 0);
   let sevenMealDelivery = sevenMeals.map((item) => item.delivery_fee);
+  sevenMealDelivery = sevenMealDelivery.filter(x => Number(x))
   let sevenDeliveryFee = sevenMealDelivery.reduce(add, 0);
   let sevenMealDiscount = sevenMeals.map((item) => item.discount);
   let sevenDiscount = sevenMealDiscount.reduce(add, 0);
   revenue = {
     plan_name: "7 Meals",
     revenue: sevenMealRevenue,
-    delivery_fee: sevenDeliveryFee !== null ? sevenDeliveryFee : 0,
+    delivery_fee: sevenDeliveryFee,
     discount: sevenDiscount
   }
   allRevenue.push(revenue)
@@ -390,13 +394,14 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   let fifteenMealBasePrice = fifteenMeals.map((item) => item.base_price);
   let fifteenMealRevenue = fifteenMealBasePrice.reduce(add, 0);
   let fifteenMealDelivery = fifteenMeals.map((item) => item.delivery_fee);
+  fifteenMealDelivery = fifteenMealDelivery.filter(x => Number(x))
   let fifteenDeliveryFee = fifteenMealDelivery.reduce(add, 0);
   let fifteenMealDiscount = fifteenMeals.map((item) => item.discount);
   let fifteenDiscount = fifteenMealDiscount.reduce(add, 0);
   revenue = {
     plan_name: "15 Meals",
     revenue: fifteenMealRevenue,
-    delivery_fee: fifteenDeliveryFee !== null ? fifteenDeliveryFee : 0,
+    delivery_fee: fifteenDeliveryFee,
     discount: fifteenDiscount
   }
   allRevenue.push(revenue)
@@ -404,13 +409,14 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   let thirtyMealBasePrice = thirtyMeals.map((item) => item.base_price);
   let thirtyMealRevenue = thirtyMealBasePrice.reduce(add, 0);
   let thirtyMealDelivery = thirtyMeals.map((item) => item.delivery_fee);
+  thirtyMealDelivery = thirtyMealDelivery.filter(x => Number(x))
   let thirtyDeliveryFee = thirtyMealDelivery.reduce(add, 0);
   let thirtyMealDiscount = thirtyMeals.map((item) => item.discount);
   let thirtyDiscount = thirtyMealDiscount.reduce(add, 0);
   revenue = {
     plan_name: "30 Meals",
     revenue: thirtyMealRevenue,
-    delivery_fee: thirtyDeliveryFee !== null ? thirtyDeliveryFee : 0,
+    delivery_fee: thirtyDeliveryFee,
     discount: thirtyDiscount
   }
   allRevenue.push(revenue)
