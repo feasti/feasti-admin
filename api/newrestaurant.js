@@ -170,8 +170,6 @@ router.route("/searchbycity/:inputcity").get(async function (req, res) {
 });
 // filter by cuisine_type
 
-
-
 router.route("/category/:food").get(async function (req, res) {
   const { food } = req.params;
   const response = await NewRestaurant.find({ status: "Active" })
@@ -291,6 +289,46 @@ router.route("/getorders/:restaurant_id").get(async (req, res) => {
     totalOrders: totalOrders,
     meals: meals,
     profile_pic: profile_pic,
+  });
+});
+
+router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
+  const { restaurant_id } = req.params
+  const myorders = await Orders.find({ restaurant_id: restaurant_id });
+  const { price_plans } = await Price.findOne({ restaurant_id: restaurant_id })
+  const { plans } = price_plans[0]
+  const totalorders = myorders.length; //Total Orders
+
+  let accepted = myorders.filter((item) => item.status === "accepted");
+  let mealCount = plans.forEach((plan, index) => {
+    myorders.filter((order, index) => order.plan_name === plan.plan_name)
+  })
+
+  const pending = myorders.filter((item) => item.status === "pending");
+  let started = myorders.filter((item) => item.status === "started");
+  const completed = myorders.filter((item) => item.status === "completed");
+  const cancelled = myorders.filter((item) => item.status === "cancelled");
+  const rejected = myorders.filter((item) => item.status === "rejected");
+
+  const acceptedCount = accepted.length;
+  const pendingCount = pending.length;
+  const startedCount = started.length;
+  const completedCount = completed.length;
+  const cancelledCount = cancelled.length;
+  const rejectedCount = rejected.length;
+  const acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
+  const rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
+  res.json({
+    mealCount,
+    totalorders,
+    acceptedCount,
+    pendingCount,
+    startedCount,
+    completedCount,
+    cancelledCount,
+    rejectedCount,
+    acceptanceRate,
+    rejectanceRate
   });
 });
 
