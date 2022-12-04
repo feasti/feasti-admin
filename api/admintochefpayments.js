@@ -7,6 +7,7 @@ const Payout = require("../models/payouts.model");
 const RestaurantDashboard = require("../models/restaurant_dashboard.model");
 const Payoutcycle = require("../models/payoutcylce.model");
 const Transaction = require("../models/transactions.model");
+const Banners = require("../models/banners.model")
 
 router.route("/").get(async (req, res) => {
   const restaurants = await NewRestaurant.find(
@@ -52,14 +53,14 @@ router.route("/").get(async (req, res) => {
           .map((dash) => dash.banners)
           .flat().length > 0
           ? dashboard
-              .filter(
-                (dashboard) =>
-                  dashboard.restaurant_id === restaurant.restaurant_id
-              )
-              .map((dash) => dash.banners)
-              .flat()
-              .map((banner) => banner.due)
-              .reduce(add, 0)
+            .filter(
+              (dashboard) =>
+                dashboard.restaurant_id === restaurant.restaurant_id
+            )
+            .map((dash) => dash.banners)
+            .flat()
+            .map((banner) => banner.due)
+            .reduce(add, 0)
           : 0,
       totalDiscount: orders
         .filter(
@@ -82,16 +83,16 @@ router.route("/").get(async (req, res) => {
           .filter((order) => order.restaurant_id === restaurant.restaurant_id)
           .map((item) => item.add_on).length > 0
           ? [].concat
-              .apply(
-                [],
-                orders
-                  .filter(
-                    (order) => order.restaurant_id === restaurant.restaurant_id
-                  )
-                  .flatMap((item) => item.add_on)
-              )
-              .map((item) => item.subtotal)
-              .reduce(add, 0)
+            .apply(
+              [],
+              orders
+                .filter(
+                  (order) => order.restaurant_id === restaurant.restaurant_id
+                )
+                .flatMap((item) => item.add_on)
+            )
+            .map((item) => item.subtotal)
+            .reduce(add, 0)
           : 0,
       totalCommissionAmt: orders
         .filter((order) => order.restaurant_id === restaurant.restaurant_id)
@@ -192,8 +193,6 @@ router.route("/getchefpayout/:rest_id").get(async (req, res) => {
   let addOns = myorders.map((el) => el.add_on);
   addOns = [].concat.apply([], addOns);
   let currentAdOns = addOns;
-  // addOns.filter((item) => item.item === "Pie");
-
   const dimensions = [
     currentAdOns.length,
     currentAdOns.reduce((x, y) => Math.max(x, y.length), 0),
@@ -217,11 +216,7 @@ router.route("/getchefpayout/:rest_id").get(async (req, res) => {
     totalPrice = 0;
   }
 
-  const dashboard = await RestaurantDashboard.findOne({
-    restaurant_id: req.params.rest_id,
-  });
-
-  let { banners } = dashboard;
+  const banners = await Banners.find({ restaurant_id: req.params.rest_id });
   let dues = banners
     .filter(
       (item) =>
@@ -290,17 +285,17 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
     currentTransaction = currentTransaction[0];
     let txn_id =
       typeof currentTransaction === "object" &&
-      Object.keys(currentTransaction, "txn_id")
+        Object.keys(currentTransaction, "txn_id")
         ? currentTransaction.txn_id
         : "";
     let deposit_date =
       typeof currentTransaction === "object" &&
-      Object.keys(currentTransaction, "deposit_date")
+        Object.keys(currentTransaction, "deposit_date")
         ? currentTransaction.deposit_date
         : "";
     let status =
       typeof currentTransaction === "object" &&
-      Object.keys(currentTransaction, "status")
+        Object.keys(currentTransaction, "status")
         ? currentTransaction.status
         : "";
     let updatedorders = myorders.filter((item) =>
@@ -310,39 +305,39 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
     let totalAddOns =
       myorders.map((item) => item.add_on).length > 0
         ? [].concat
-            .apply(
-              [],
-              myorders.flatMap((item) => item.add_on)
+          .apply(
+            [],
+            myorders.flatMap((item) => item.add_on)
+          )
+          .filter((item) =>
+            moment(item.order_date).isBetween(
+              moment(sd),
+              moment(nd),
+              null,
+              "[]"
             )
-            .filter((item) =>
-              moment(item.order_date).isBetween(
-                moment(sd),
-                moment(nd),
-                null,
-                "[]"
-              )
-            )
-            .map((item) => item.qty)
-            .reduce(add, 0)
+          )
+          .map((item) => item.qty)
+          .reduce(add, 0)
         : 0;
 
     let totalAddOnRevenue =
       myorders.map((item) => item.add_on).length > 0
         ? [].concat
-            .apply(
-              [],
-              myorders.flatMap((item) => item.add_on)
+          .apply(
+            [],
+            myorders.flatMap((item) => item.add_on)
+          )
+          .filter((item) =>
+            moment(item.order_date).isBetween(
+              moment(sd),
+              moment(nd),
+              null,
+              "[]"
             )
-            .filter((item) =>
-              moment(item.order_date).isBetween(
-                moment(sd),
-                moment(nd),
-                null,
-                "[]"
-              )
-            )
-            .map((item) => item.subtotal)
-            .reduce(add, 0)
+          )
+          .map((item) => item.subtotal)
+          .reduce(add, 0)
         : 0;
     let totalBaseIncome = basePrices.reduce(add, 0);
     let totalCommission = totalBaseIncome * 0.1;
@@ -364,11 +359,11 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
       restaurantDetails;
     let chefBalance = parseFloat(
       totalBaseIncome +
-        totalAddOnRevenue -
-        AdOnsCommission -
-        totalCommission -
-        totalDiscount -
-        dueAmt
+      totalAddOnRevenue -
+      AdOnsCommission -
+      totalCommission -
+      totalDiscount -
+      dueAmt
     ).toFixed(2);
     return {
       restID: req.params.rest_id,
