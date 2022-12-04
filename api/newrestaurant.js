@@ -295,14 +295,14 @@ router.route("/getorders/:restaurant_id").get(async (req, res) => {
 router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const { restaurant_id } = req.params
   const myorders = await Orders.find({ restaurant_id: restaurant_id });
-  const { price_plans } = await Price.findOne({ restaurant_id: restaurant_id })
-  const { plans } = price_plans[0]
+  const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant_id })
+  // const { plans } = price_plans[0]
   const totalorders = myorders.length; //Total Orders
 
   let accepted = myorders.filter((item) => item.status === "accepted");
-  let mealCount = plans.forEach((plan, index) => {
-    myorders.filter((order, index) => order.plan_name === plan.plan_name)
-  })
+  // let mealCount = plans.forEach((plan, index) => {
+  //   myorders.filter((order, index) => order.plan_name === plan.plan_name)
+  // })
 
   const pending = myorders.filter((item) => item.status === "pending");
   let started = myorders.filter((item) => item.status === "started");
@@ -319,7 +319,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
   const rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
   res.json({
-    mealCount,
+    // mealCount,
     totalorders,
     acceptedCount,
     pendingCount,
