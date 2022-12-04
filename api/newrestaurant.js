@@ -7,6 +7,8 @@ const Price = require("../models/price_plan.model")
 const Coupon = require('../models/coupons.model')
 const Banner = require("../models/banners.model")
 
+const add = (accumulator, curr) => parseFloat(accumulator) + parseFloat(curr);
+
 router.route("/").get(async function (req, res) {
   const response = await NewRestaurant.find({})
   const meals = await Meals.find({})
@@ -296,13 +298,126 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const { restaurant_id } = req.params
   const myorders = await Orders.find({ restaurant_id: restaurant_id });
   const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant_id })
-  const { plans } = price_plans[0]
   const totalorders = myorders.length; //Total Orders
 
   let accepted = myorders.filter((item) => item.status === "accepted");
-  let mealCount = plans.forEach((plan, index) => {
-    myorders.filter((order, index) => order.plan_name === plan.plan_name)
+  let planwiseOrders = []
+  let singleMeals = []
+  let twoMeals = []
+  let sevenMeals = []
+  let fifteenMeals = []
+  let thirtyMeals = []
+  price_plans.filter((plan) => {
+    myorders.filter((order) => {
+      const { plans } = plan
+      if (order.category === plan.category) {
+        plans.filter((item) => {
+          if (item.plan_name === order.plan_name) {
+            let mealOrder = {}
+            mealOrder.plan_name = order.plan_name
+            mealOrder.discount = order.discount
+            mealOrder.base_price = order.base_price
+            mealOrder.delivery_fee = order.delivery_fee
+            planwiseOrders.push(mealOrder)
+          }
+        })
+      }
+    })
   })
+
+  planwiseOrders.map((planwiseorder) => {
+    if (planwiseorder.plan_name === "1 Meal") {
+      singleMeals.push(planwiseorder)
+    }
+    if (planwiseorder.plan_name === "2 Meals") {
+      twoMeals.push(planwiseorder)
+    }
+    if (planwiseorder.plan_name === "7 Meals") {
+      sevenMeals.push(planwiseorder)
+    }
+    if (planwiseorder.plan_name === "15 Meals") {
+      fifteenMeals.push(planwiseorder)
+    }
+    if (planwiseorder.plan_name === "30 Meals") {
+      thirtyMeals.push(planwiseorder)
+    }
+  })
+  let allRevenue = []
+  let revenue = {}
+  let singelMealBasePrice = singleMeals.map((item) => item.base_price);
+  let singleMealRevenue = singelMealBasePrice.reduce(add, 0);
+  let singelMealDelivery = singleMeals.map((item) => item.delivery_fee);
+  let singleDeliveryFee = singelMealDelivery.reduce(add, 0);
+  let singelMealDiscount = singleMeals.map((item) => item.discount);
+  let singleDiscount = singelMealDiscount.reduce(add, 0);
+  revenue = {
+    plan_name: "1 Meal",
+    revenue: singleMealRevenue,
+    delivery_fee: singleDeliveryFee,
+    discount: singleDiscount
+  }
+  allRevenue.push(revenue)
+
+
+  let twoMealBasePrice = twoMeals.map((item) => item.base_price);
+  let twoMealRevenue = twoMealBasePrice.reduce(add, 0);
+  let twoMealDelivery = twoMeals.map((item) => item.delivery_fee);
+  let twoDeliveryFee = twoMealDelivery.reduce(add, 0);
+  let twoMealDiscount = twoMeals.map((item) => item.discount);
+  let twoDiscount = twoMealDiscount.reduce(add, 0);
+  revenue = {
+    plan_name: "2 Meals",
+    revenue: twoMealRevenue,
+    delivery_fee: twoDeliveryFee,
+    discount: twoDiscount
+  }
+  allRevenue.push(revenue)
+
+  let sevenMealBasePrice = sevenMeals.map((item) => item.base_price);
+  let sevenMealRevenue = sevenMealBasePrice.reduce(add, 0);
+  let sevenMealDelivery = sevenMeals.map((item) => item.delivery_fee);
+  let sevenDeliveryFee = sevenMealDelivery.reduce(add, 0);
+  let sevenMealDiscount = sevenMeals.map((item) => item.discount);
+  let sevenDiscount = sevenMealDiscount.reduce(add, 0);
+  revenue = {
+    plan_name: "7 Meals",
+    revenue: twoMealRevenue,
+    delivery_fee: twoDeliveryFee,
+    discount: twoDiscount
+  }
+  allRevenue.push(revenue)
+
+  let fifteenMealBasePrice = fifteenMeals.map((item) => item.base_price);
+  let fifteenMealRevenue = fifteenMealBasePrice.reduce(add, 0);
+  let fifteenMealDelivery = fifteenMeals.map((item) => item.delivery_fee);
+  let fifteenDeliveryFee = fifteenMealDelivery.reduce(add, 0);
+  let fifteenMealDiscount = fifteenMeals.map((item) => item.discount);
+  let fifteenDiscount = fifteenMealDiscount.reduce(add, 0);
+  revenue = {
+    plan_name: "15 Meals",
+    revenue: fifteenMealRevenue,
+    delivery_fee: fifteenDeliveryFee,
+    discount: fifteenDiscount
+  }
+  allRevenue.push(revenue)
+
+  let thirtyMealBasePrice = thirtyMeals.map((item) => item.base_price);
+  let thirtyMealRevenue = thirtyMealBasePrice.reduce(add, 0);
+  let thirtyMealDelivery = thirtyMeals.map((item) => item.delivery_fee);
+  let thirtyDeliveryFee = thirtyMealDelivery.reduce(add, 0);
+  let thirtyMealDiscount = thirtyMeals.map((item) => item.discount);
+  let thirtyDiscount = thirtyMealDiscount.reduce(add, 0);
+  revenue = {
+    plan_name: "30 Meals",
+    revenue: thirtyMealRevenue,
+    delivery_fee: thirtyDeliveryFee,
+    discount: thirtyDiscount
+  }
+  allRevenue.push(revenue)
+
+
+
+
 
   const pending = myorders.filter((item) => item.status === "pending");
   let started = myorders.filter((item) => item.status === "started");
@@ -319,7 +434,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
   const rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
   res.json({
-    mealCount,
+    allRevenue,
     totalorders,
     acceptedCount,
     pendingCount,
@@ -329,7 +444,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
     rejectedCount,
     acceptanceRate,
     rejectanceRate
-  });
+  })
 });
 
 module.exports = router;
