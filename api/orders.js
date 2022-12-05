@@ -39,6 +39,12 @@ router.route("/:id").get(async function (req, res) {
   res.json(order)
 });
 //get specific order
+router.route("/getOrderbyID/:id").get(async function (req, res) {
+  const { id } = req.params;
+  const order = await Order.findOne({ order_id: id })
+  res.json(order)
+});
+//get specific order
 
 router.route("/rejected/:restaurant_id").get(async (req, res) => {
   const rejectedorders = await Order.find({
