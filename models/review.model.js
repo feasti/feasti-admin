@@ -11,7 +11,7 @@ const Review = new Schema({
   plan_name: String,
   base_price: String,
   start_date: String,
-  end_date:String,
+  end_date: String,
   rating: String,
   likes: Array,
   details: String,
@@ -22,11 +22,7 @@ const Review = new Schema({
       body: String,
       commented_at: { type: String, default: Date.now() },
     },
-  ],
-  review_at: {
-    type: String,
-    default: Date.now(),
-  },
-});
+  ]
+}, { timestamps: true });
 
 module.exports = mongoose.model("Review", Review);
