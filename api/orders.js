@@ -209,18 +209,23 @@ router.route("/getorderbyuser/:id").get(async function (req, res) {
 router.route("/getsubscription/:id").get(async function (req, res) {
   let { id } = req.params;
   const orders = await Order.find({ user_id: id, status: "started" });
-  const restaurants = await NewRestaurant.find()
   let myOrders = []
-  orders.map(async (order) => {
-    restaurants.filter((restaurant) => {
-      if (restaurant.restaurant_id === order.restaurant_id) {
-        order.restaurant_image = restaurant.documents[0].restaurant_image
-        order.meals = restaurant.meals
-      }
-    })
-    myOrders.push(order)
+  orders.forEach((order) => {
+    async function populate(item) {
+      const { restaurant_id, category } = item
+      const restaurant = await NewRestaurant.findOne({ restaurant_id: restaurant_id })
+      const { documents } = restaurant
+      const { meals } = await Meals.findOne({ restaurant_id: restaurant_id })
+      const { items } = meals.find((o) => o.category === category)
+      item.meals = items
+      item.restaurant_image = documents[0].restaurant_image
+      myOrders.push(item)
+    }
+    populate(order)
   })
-  res.json({ mySubscription: myOrders, totalCount: myOrders.length });
+  setTimeout(() => {
+    res.json({ mySubscription: myOrders, totalCount: myOrders.length });
+  }, 10000)
 });
 //get all subscription by user
 
