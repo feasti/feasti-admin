@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 let AdminCoupon = new Schema({
+    promo_id: { type: String },
     promo_code: { type: String },
     promo_text: { type: String },
     price: { type: String },
