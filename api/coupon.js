@@ -53,11 +53,11 @@ router.route("/getcouponforchef/:restaurant_id/:status").get(async (req, res) =>
         promoted_orders.push(myOrders[j]);
       }
     }
-    revenue =
-      parseFloat(promoted_orders[i].base_price) * parseFloat(promoted_orders.length);
-    discount =
+    revenue = promoted_orders.length !== 0 ? (parseFloat(promoted_orders[i].base_price) * parseFloat(promoted_orders.length)) : 0
+    discount = promoted_orders.length !== 0 ? (
       parseFloat(promoted_orders[i].discount) *
-      parseFloat(promoted_orders.length);
+      parseFloat(promoted_orders.length)
+    ) : 0
   }
   const userids = promoted_orders.map((item) => item.user_id);
   let uniq = [...new Set(userids)];
