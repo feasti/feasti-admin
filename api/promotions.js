@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Promo = require("../models/banners.model");
 const Restaurants = require("../models/newrest.model");
+const Orders = require('../models/orders.model')
 
 router.route("/").get(async (req, res) => {
   const banner = await Promo.find();
@@ -29,9 +30,58 @@ router.route("/active").get(async (req, res) => {
 
 router.route("/:restaurant_id/:status").get(async (req, res) => {
   const { restaurant_id, status } = req.params
-  const banner = await Promo.find({ restaurant_id: restaurant_id, status: status });
-  res.json(banner);
+  const myCoupons = await Promo.find({ restaurant_id: restaurant_id, status: status });
+  const myOrders = await Orders.find({
+    $and: [{ restaurant_id: restaurant_id }, {
+      $or: [{ status: "accepted" },
+      { status: "started" },
+      { status: "completed" }
+      ]
+    }]
+
+  });
+  let promoted_orders = [];
+  let revenue = 0;
+  let discount = 0;
+  for (let i = 0; i < myCoupons.length; i++) {
+    for (let j = 0; j < myOrders.length; j++) {
+      if (myCoupons[i].promo_code === myOrders[j].promo_code) {
+        promoted_orders.push(myOrders[j]);
+      }
+    }
+    revenue = promoted_orders.length !== 0 ? (parseFloat(promoted_orders[i].base_price) * parseFloat(promoted_orders.length)) : 0
+    discount = promoted_orders.length !== 0 ? (
+      parseFloat(promoted_orders[i].discount) *
+      parseFloat(promoted_orders.length)
+    ) : 0
+  }
+  const userids = promoted_orders.map((item) => item.user_id);
+  let uniq = [...new Set(userids)];
+  res.json({
+    coupons: myCoupons,
+    promotedOrders: promoted_orders,
+    total_order: promoted_orders.length,
+    revenue: revenue,
+    total_base_income: revenue,
+    total_net_income: revenue - discount,
+    unique: uniq,
+    unique_users: uniq.length,
+    discount: discount,
+  });
 });
+
+router.route("/getchefbyidandupdatebannercount/:promo_id/:id").get(async (req, res) => {
+  const { promo_id, id } = req.params
+  const response = await Promo.findOne({ promo_id: promo_id });
+  let { clicks, due, rpc } = response;
+  clicks += 1;
+  due += parseFloat(rpc);
+  const update = await Promo.findByIdAndUpdate({ _id: id },
+    { clicks: clicks, due: due }
+  );
+  res.json(update);
+});
+// 
 
 router.route("/getbannerslength/:restaurant_id").get(async (req, res) => {
   const banner = await Promo.find({
