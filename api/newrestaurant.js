@@ -27,7 +27,6 @@ router.route("/").get(async function (req, res) {
 
 router.route("/active").get(async function (req, res) {
   const response = await NewRestaurant.find({ status: "Active" })
-  const meals = await Meals.find({})
   let restaurants = []
   response.forEach(async (restaurant) => {
     const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
@@ -68,7 +67,7 @@ router.route("/login").post(async (req, res) => {
 
 router.route("/:id").delete(async (req, res, next) => {
   const { id } = req.params
-  const response = await NewRestaurant.findByIdAndDelete(id)
+  await NewRestaurant.findByIdAndDelete(id)
   res.json({
     status: 200,
     msg: "Deleted"
@@ -87,15 +86,9 @@ router.route("/").post(async function (req, res) {
 });
 //save a restaurant
 
-router.route("/:id").put(function (req, res, next) {
-  NewRestaurant.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    function (err, restaurant) {
-      if (err) return next(err);
-      res.json(restaurant);
-    }
-  );
+router.route("/:id").put(async function (req, res, next) {
+  const restaurant = await NewRestaurant.findByIdAndUpdate(req.params.id, req.body)
+  res.json(restaurant)
 });
 //update a restaurant
 
