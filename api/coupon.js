@@ -30,17 +30,19 @@ router.route("/").post(async function (req, res) {
 });
 //save a singe coupon to database
 
-router.route("/getcouponforchef/:restaurant/:status").get(async (req, res) => {
+router.route("/getcouponforchef/:restaurant_id/:status").get(async (req, res) => {
+  const { status, restaurant_id } = req.params
   const myCoupons = await Coupon.find({
-    restaurant_id: req.params.restaurant,
-    status: req.params.status,
+    $and: [{ restaurant_id: restaurant_id }, { status: status }]
   });
   const myOrders = await Orders.find({
-    restaurant_id: req.params.restaurant,
-    $or: [{ status: "accepted" },
-    { status: "started" },
-    { status: "completed" }
-    ]
+    $and: [{ restaurant_id: restaurant_id }, {
+      $or: [{ status: "accepted" },
+      { status: "started" },
+      { status: "completed" }
+      ]
+    }]
+
   });
   let promoted_orders = [];
   let revenue = 0;
@@ -52,9 +54,9 @@ router.route("/getcouponforchef/:restaurant/:status").get(async (req, res) => {
       }
     }
     revenue =
-      parseFloat(myCoupons[i].price) * parseFloat(promoted_orders.length);
+      parseFloat(promoted_orders[i].base_price) * parseFloat(promoted_orders.length);
     discount =
-      parseFloat(myCoupons[i].absolute_value) *
+      parseFloat(promoted_orders[i].discount) *
       parseFloat(promoted_orders.length);
   }
   const userids = promoted_orders.map((item) => item.user_id);
@@ -62,8 +64,12 @@ router.route("/getcouponforchef/:restaurant/:status").get(async (req, res) => {
   res.json({
     coupons: myCoupons,
     promotedOrders: promoted_orders,
+    total_order: promoted_orders.length,
     revenue: revenue,
+    total_base_income: revenue,
+    total_net_income: revenue - discount,
     unique: uniq,
+    unique_users: uniq.length,
     discount: discount,
   });
 });
