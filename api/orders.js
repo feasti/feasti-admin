@@ -300,21 +300,18 @@ router.route("/dashboard/:restaurant_id").get(async (req, res) => {
   });
 });
 
-router.put("/:id", function (req, res, next) {
-  let id = req.params.id;
-  Order.findByIdAndUpdate(id, req.body, (err, response) => {
-    if (err) {
-      res.json({ status: 403, msg: "Bad Request" });
-    } else {
-      Order.findById(id, function (error, user) {
-        res.json({
-          status: 201,
-          data: user,
-          msg: "Add-On ordered successfully",
-        });
-      });
-    }
-  });
+router.put("/:id", async function (req, res, next) {
+  const { id } = req.params
+  const { add_on } = await Order.findById(id)
+  let add_ons = [...add_on]
+  add_ons.push(req.body)
+  const response = await Order.findByIdAndUpdate(id, { add_on: add_ons })
+  const updateorder = await Order.findById(id)
+  res.json({
+    status: 201,
+    data: updateorder,
+    msg: "Add-On ordered successfully"
+  })
 });
 //update an order
 
