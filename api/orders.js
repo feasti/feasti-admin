@@ -304,7 +304,7 @@ router.put("/:id", async function (req, res, next) {
   const { id } = req.params
   const { add_on } = await Order.findById(id)
   let add_ons = [...add_on]
-  add_ons.push(req.body)
+  add_ons.push(...req.body)
   const response = await Order.findByIdAndUpdate(id, { add_on: add_ons })
   const updateorder = await Order.findById(id)
   res.json({
