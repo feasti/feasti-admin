@@ -98,10 +98,47 @@ router.route("/").post(async (req, res) => {
 });
 //save a banner
 
-router.route("/getbannerdetails/:id").get(async (req, res) => {
+router.route("/:id").get(async (req, res) => {
   let { id } = req.params;
-  const banner = await Promo.findById(id);
-  res.json({ status: 200, data: banner, msg: "Promo Plan Fetched" });
+  const myCoupons = await Promo.findById(id);
+  let promoted_orders = [];
+  let revenue = 0;
+  let discount = 0;
+  const myOrders = await Orders.find({
+    $and: [{ promo_id: myCoupons.promo_id }, {
+      $or: [{ status: "accepted" },
+      { status: "started" },
+      { status: "completed" }
+      ]
+    }]
+
+  });
+
+  // for (let j = 0; j < myOrders.length; j++) {
+  //   if (myCoupons.promo_code === myOrders[j].promo_code) {
+  //     promoted_orders.push(myOrders[j]);
+  //   }
+  //   revenue = promoted_orders.length !== 0 ? (parseFloat(promoted_orders[j].base_price) * parseFloat(promoted_orders.length)) : 0
+  //   discount = promoted_orders.length !== 0 ? (
+  //     parseFloat(promoted_orders[j].discount) *
+  //     parseFloat(promoted_orders.length)
+  //   ) : 0
+
+  // }
+
+  // const userids = promoted_orders.map((item) => item.user_id);
+  // let uniq = [...new Set(userids)];
+  res.json({
+    coupons: myCoupons,
+    promotedOrders: myOrders,
+    // total_order: promoted_orders.length,
+    // revenue: revenue,
+    // total_base_income: revenue,
+    // total_net_income: revenue - discount,
+    // unique: uniq,
+    // unique_users: uniq.length,
+    // discount: discount,
+  });
 });
 //get specific banner
 
