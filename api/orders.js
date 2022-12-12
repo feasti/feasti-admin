@@ -292,9 +292,9 @@ router.route("/dashboard/:restaurant_id").get(async (req, res) => {
     countThirtyMeals: thirtyOrders.length,
   });
 });
-router.put("/chagestatus/:id", async function (req, res, next) {
+router.put("/changestatus/:id", async function (req, res, next) {
   const { id } = req.params
-  const response = await Order.findByIdAndUpdate(id, body)
+  const response = await Order.findByIdAndUpdate(id, req.body)
   const updateorder = await Order.findById(id)
   res.json({
     status: 201,
