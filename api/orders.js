@@ -111,58 +111,51 @@ router.route("/forchefhome/:restaurant_id/:day/:category").get(async (req, res) 
     [],
     activeorders.flatMap((item) => item.add_on)
   );
-  let restaurant = await NewRestaurant.findOne({ restaurant_id: restaurant_id });
   let { meals } = await Meals.findOne({ restaurant_id: restaurant_id })
   meals = meals.find((meal) => meal.category === category).items
-  let dateInNumber = moment().day();
-  dateInNumber >= 0 ? dateInNumber : 1;
-  let meal = {};
-  let meal_name = "";
-  let type = "";
-  let add_on = [];
+  let mealName = "";
+  let mealType = "";
   let count = 0;
-  let filtered_add_ons = [];
   let add_on_name = [];
-  let total_ad_on = 0;
+  let todayAdOns = []
   if (day === "Today") {
     const today = moment();
     activeorders = activeorders.filter((item) =>
       today.isBetween(item.start_date, moment(item.end_date).add(1, "day"))
     );
+    todayAdOns = orderedAdOns.filter((extra) => extra.order_date === today.format('DD-MMM-YYYY'))
+    const { meal_name, type, add_on } = meals.find((meal) => meal.day === today.format('dddd'))
+    mealName = meal_name
+    mealType = type
     count = activeorders.length;
-    meal = meals[dateInNumber - 1];
-    meal_name = meal.meal_name;
-    type = meal.type;
-    add_on = meal.add_on;
     add_on_name = Array.isArray(add_on) && add_on.length !== 0 ? add_on.map((data) => data.add_on) : [];
   } else if (day === "Tomorrow") {
     const today = moment().add(1, "days");
     activeorders = activeorders.filter((item) =>
       today.isBetween(item.start_date, moment(item.end_date).add(1, "day"))
     );
+    const { meal_name, type, add_on } = meals.find((meal) => meal.day === today.format('dddd'))
     count = activeorders.length;
-    meal = meals[dateInNumber];
-    meal_name = meal.meal_name;
-    type = meal.type;
-    add_on = meal.add_on;
+    mealName = meal_name;
+    mealType = type;
     add_on_name = Array.isArray(add_on) && add_on.length !== 0 ? add_on.map((data) => data.add_on) : [];
   } else {
     const today = moment().add(2, "days");
     activeorders = activeorders.filter((item) =>
       today.isBetween(item.start_date, moment(item.end_date).add(1, "day"))
     );
+    const { meal_name, type, add_on } = meals.find((meal) => meal.day === today.format('dddd'))
     count = activeorders.length;
-    meal = meals[dateInNumber + 1];
-    meal_name = meal.meal_name;
-    type = meal.type;
-    add_on = meal.add_on;
+    mealName = meal_name;
+    mealType = type;
     add_on_name = Array.isArray(add_on) && add_on.length !== 0 ? add_on.map((data) => data.add_on) : [];
   }
   res.json({
     count: count,
-    meal_name: meal_name,
+    orderedAdOns: todayAdOns,
+    meal_name: mealName,
     add_ons: add_on_name,
-    type: type,
+    type: mealType,
   });
 });
 //get active orders
@@ -299,7 +292,17 @@ router.route("/dashboard/:restaurant_id").get(async (req, res) => {
     countThirtyMeals: thirtyOrders.length,
   });
 });
-
+router.put("/chagestatus/:id", async function (req, res, next) {
+  const { id } = req.params
+  const response = await Order.findByIdAndUpdate(id, body)
+  const updateorder = await Order.findById(id)
+  res.json({
+    status: 201,
+    data: updateorder,
+    msg: "Status updated successfully"
+  })
+});
+//update an order
 router.put("/:id", async function (req, res, next) {
   const { id } = req.params
   const { add_on } = await Order.findById(id)
