@@ -171,7 +171,7 @@ router.route("/:id").delete(async (req, res) => {
 router.route("/").post(async function (req, res) {
   const { orderToPlace } = req.body
   let count = await Order.count()
-  count=count+1
+  count = count + 1
   const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
   const order = new Order({ ...orderToPlace, order_id: orderId })
   const response = await order.save()
