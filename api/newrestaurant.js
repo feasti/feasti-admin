@@ -307,7 +307,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
       const { plans } = plan
       if (order.category === plan.category) {
         plans.filter((item) => {
-          if (item.plan_name === order.plan_name && ) {
+          if (item.plan_name === order.plan_name) {
             let mealOrder = {}
             mealOrder.plan_name = order.plan_name
             mealOrder.discount = order.discount
