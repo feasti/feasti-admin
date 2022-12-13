@@ -307,7 +307,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
       const { plans } = plan
       if (order.category === plan.category) {
         plans.filter((item) => {
-          if (item.plan_name === order.plan_name) {
+          if (item.plan_name === order.plan_name && ) {
             let mealOrder = {}
             mealOrder.plan_name = order.plan_name
             mealOrder.discount = order.discount
@@ -321,19 +321,19 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   })
 
   planwiseOrders.map((planwiseorder) => {
-    if (planwiseorder.plan_name === "1 Meal") {
+    if (planwiseorder.plan_name === "1 Meal" && planwiseorder.status !== "rejected") {
       singleMeals.push(planwiseorder)
     }
-    if (planwiseorder.plan_name === "2 Meals") {
+    if (planwiseorder.plan_name === "2 Meals" && planwiseorder.status !== "rejected") {
       twoMeals.push(planwiseorder)
     }
-    if (planwiseorder.plan_name === "7 Meals") {
+    if (planwiseorder.plan_name === "7 Meals" && planwiseorder.status !== "rejected") {
       sevenMeals.push(planwiseorder)
     }
-    if (planwiseorder.plan_name === "15 Meals") {
+    if (planwiseorder.plan_name === "15 Meals" && planwiseorder.status !== "rejected") {
       fifteenMeals.push(planwiseorder)
     }
-    if (planwiseorder.plan_name === "30 Meals") {
+    if (planwiseorder.plan_name === "30 Meals" && planwiseorder.status !== "rejected") {
       thirtyMeals.push(planwiseorder)
     }
   })
