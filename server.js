@@ -30,6 +30,7 @@ const review = require("./api/reviews");
 const slot = require("./api/slots");
 const stripeintent = require("./api/stripe");
 const users = require("./api/users");
+const updater = require("./api/updater")
 // End of API imports
 
 const app = express();
@@ -82,3 +83,4 @@ app.get("/*", (req, res) => {
 app.listen(port, () => {
   console.warn(`Server started on port ${port}`);
 });
+updater.start()

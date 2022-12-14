@@ -21,6 +21,7 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.1",
     "mongoose": "^6.2.9",
+    "node-cron": "^3.0.2",
     "nodemon": "^2.0.6",
     "stripe": "^8.208.0"
   }
