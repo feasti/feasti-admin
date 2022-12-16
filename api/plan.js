@@ -38,5 +38,10 @@ router.route("/:id").delete(async function (req, res, next) {
   const data = await Plan.findByIdAndDelete(req.params.id)
   res.json({ msg: "Plan Deleted", data })
 });
+router.put('/update', async function (req, res) {
+  const { plans } = req.body
+  const response = Plan.updateMany({}, plans)
+  res.json(response)
+})
 
 module.exports = router;
