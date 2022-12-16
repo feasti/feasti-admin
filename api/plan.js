@@ -11,6 +11,7 @@ router.route('/getProfitMargin').get(async (req, res) => {
   const plans = await Plan.find({}, { plan_name: 1, profit_margin: 1, _id: 0 })
   res.json(plans)
 })
+
 router.route("/:id").get(function (req, res) {
   let id = req.params.id;
   Plan.findById(id, function (err, user) {
@@ -19,10 +20,10 @@ router.route("/:id").get(function (req, res) {
 });
 
 router.put("/:id", function (req, res) {
-  let id = req.params.id;
-  let { plans } = req.body;
-  Plan.findByIdAndUpdate(id, plans, function (err, resp) {
-    res.json(plans);
+  const {id}=req.params
+  let plan = req.body;
+  Plan.findByIdAndUpdate(id, plan, function (err, resp) {
+    res.json(plan);
   });
 });
 //add an address
@@ -38,10 +39,8 @@ router.route("/:id").delete(async function (req, res, next) {
   const data = await Plan.findByIdAndDelete(req.params.id)
   res.json({ msg: "Plan Deleted", data })
 });
-router.put('/update', async function (req, res) {
-  const { plans } = req.body
-  const response = Plan.updateMany({}, plans)
-  res.json(response)
-})
+
+
+
 
 module.exports = router;
