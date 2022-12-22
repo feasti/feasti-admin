@@ -32,13 +32,8 @@ let NewRestaurant = new Schema({
     },
   ],
   email: { type: String },
-
   owner_name: { type: String },
-
   phone: { type: String },
-  base_2price: { type: String },
-  base_15price: { type: String },
-  base_30price: { type: String },
 
   restaurant_name: { type: String },
   status: { type: String, default: "Inactive" },

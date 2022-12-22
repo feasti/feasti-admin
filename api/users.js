@@ -19,7 +19,7 @@ router.route("/").post(async function (req, res) {
   }
   else {
     const count = await Users.count()
-    const userId = "USER".concat(count.toString().padStart(4, "0"))
+    const userId = "USER".concat((count+1).toString().padStart(4, "0"))
     const user = new Users({ phone: phone, user_id: userId });
     const response = await user.save()
     res.json({
