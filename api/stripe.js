@@ -75,7 +75,7 @@ router.route("/charge/:currency").post(async (req, res) => {
 router.route("/pay/:currency").post(async (req, res) => {
   const { token, amount, user_id, restaurant_id, plan_name } = req.body;
   try {
-    const charge = await stripe.charges.create({
+    const charge = await stripe_us.charges.create({
       amount: amount * 100,
       currency: req.params.currency,
       description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
