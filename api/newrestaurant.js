@@ -74,13 +74,20 @@ router.route("/:id").delete(async (req, res, next) => {
 //delete a restaurant
 
 router.route("/").post(async function (req, res) {
-  let restaurant = new NewRestaurant(req.body);
-  const response = await restaurant.save()
-  res.json({
-    data: response,
-    status: 200,
-    msg: "Restaurant Added Successfully",
-  });
+  const count = await NewRestaurant.count()
+  const restId = "REST".concat((count + 1).toString().padStart(4, "0"))
+  let restaurant = new NewRestaurant({ ...req.body, restaurant_id: restId });
+  restaurant.save().then((response) => {
+    res.json({
+      data: response,
+      status: 200,
+      msg: "Restaurant Added Successfully",
+    });
+  }).catch((err) => {
+    res.json({
+      msg: err
+    });
+  })
 });
 //save a restaurant
 
