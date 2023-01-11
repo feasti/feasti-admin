@@ -51,7 +51,7 @@ router.route("/:id").get(function (req, res) {
       res.json({
         status: 404,
         data: err,
-        msg: "No Request Found!!! Please try later",
+        msg: "No Request Found! Please try later",
       });
     } else {
       res.json({ status: 200, data: partner, msg: "Request received" });

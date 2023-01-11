@@ -26,7 +26,7 @@ router.route("/").post(function (req, res) {
   contact
     .save()
     .then((response) => {
-      res.json({ data: response, msg: "Contact Placed!!!", status: 200 });
+      res.json({ data: response, msg: "Contact Placed!", status: 200 });
     })
     .catch((err) => {
       res.status(400).send("Failed");
