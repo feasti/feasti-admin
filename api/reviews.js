@@ -64,7 +64,7 @@ router.route("/").post(function (req, res) {
   review
     .save()
     .then((response) => {
-      res.json({ data: response, msg: "Review Placed!!!", status: 200 });
+      res.json({ data: response, msg: "Review Placed!", status: 200 });
     })
     .catch((err) => {
       res.status(400).send("Failed");

@@ -20,7 +20,7 @@ router.route("/").post(function (req, res) {
   order
     .save()
     .then((response) => {
-      res.json({ data: response, msg: "Order Placed!!!", status: 200 });
+      res.json({ data: response, msg: "Order Placed!", status: 200 });
     })
     .catch((err) => {
       res.status(400).send("Failed");

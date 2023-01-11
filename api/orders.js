@@ -175,7 +175,7 @@ router.route("/").post(async function (req, res) {
   const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
   const order = new Order({ ...orderToPlace, order_id: orderId })
   const response = await order.save()
-  res.json({ data: response, msg: "Order Placed!!!", status: 200 });
+  res.json({ data: response, msg: "Order Placed!", status: 200 });
 });
 //save a order
 
