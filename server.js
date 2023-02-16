@@ -36,8 +36,8 @@ const updater = require("./api/updater")
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(bodyParser.json({ limit: "10mb" }));
-app.use(bodyParser.urlencoded({ limit: "10mb", extended: false }));
+app.use(bodyParser.json({ limit: "100mb" }));
+app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 app.use(express.json())
 app.use(cors());
 
