@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_CANADA, {
   apiVersion: "2020-08-27",
   appInfo: {
     name: "feasti dash inc",
@@ -74,19 +74,35 @@ router.route("/charge/:currency").post(async (req, res) => {
 
 router.route("/pay/:currency").post(async (req, res) => {
   const { token, amount, user_id, restaurant_id, plan_name } = req.body;
+  const currency = req.params.currency
   try {
-    const charge = await stripe_us.charges.create({
-      amount: amount * 100,
-      currency: req.params.currency,
-      description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
-      source: token,
-      metadata: {
-        user_id: user_id,
-        restaurant_id: restaurant_id,
-        plan_name: plan_name,
-      },
-    });
-    res.send(charge);
+    if (currency === 'CAD') {
+      const charge = await stripe.charges.create({
+        amount: amount * 100,
+        currency: 'CAD',
+        description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
+        source: token,
+        metadata: {
+          user_id: user_id,
+          restaurant_id: restaurant_id,
+          plan_name: plan_name,
+        },
+      });
+      res.send(charge);
+    } else {
+      const charge = await stripe_us.charges.create({
+        amount: amount * 100,
+        currency: 'USD',
+        description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
+        source: token,
+        metadata: {
+          user_id: user_id,
+          restaurant_id: restaurant_id,
+          plan_name: plan_name,
+        },
+      });
+      res.send(charge);
+    }
   } catch (err) {
     res.send(err)
   }
