@@ -1,3 +1,3 @@
-function add(accumulator, a) {
-    return parseFloat(accumulator) + parseFloat(a);
-}
+const add = (accumulator, curr) => parseFloat(accumulator) + parseFloat(curr);
+
+module.exports = { add }
