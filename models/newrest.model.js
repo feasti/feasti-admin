@@ -11,7 +11,7 @@ let NewRestaurant = new Schema({
   institution_number: { type: String },
   locality: { type: String },
   city: { type: String },
-  state: { type: String },
+  states: { type: String },
   country: { type: String },
   postal_code: { type: String },
   commission: { type: String },
