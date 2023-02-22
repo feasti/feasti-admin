@@ -1,4 +1,5 @@
 const express = require("express");
+const { add } = require('../utility/utility')
 const router = express.Router();
 const NewRestaurant = require("../models/newrest.model");
 const Meals = require('../models/meals.model')
@@ -7,7 +8,7 @@ const Price = require("../models/price_plan.model")
 const Coupon = require('../models/coupons.model')
 const Banner = require("../models/banners.model")
 
-const add = (accumulator, curr) => parseFloat(accumulator) + parseFloat(curr);
+
 
 router.route("/").get(async function (req, res) {
   const response = await NewRestaurant.find({})
@@ -77,16 +78,19 @@ router.route("/").post(async function (req, res) {
   const count = await NewRestaurant.count()
   const restId = "REST".concat((count + 1).toString().padStart(4, "0"))
   let restaurant = new NewRestaurant({ ...req.body, restaurant_id: restId });
-  restaurant.save().then((response) => {
-    res.json({
-      data: response,
-      status: 200,
-      msg: "Restaurant Added Successfully",
-    });
-  }).catch((err) => {
-    res.json({
-      msg: err
-    });
+  let meals = new Meals({ restaurant_id: restId, meals: [{ category: "Lunch", items: [] }, { category: "Dinner", items: [] }] })
+  const saveMeals = await meals.save()
+  let price = new Price({
+    restaurant_id: restId,
+    isDelivery: false,
+    price_plans: [{ category: "Lunch", plans: [] }, { category: "Dinner", plans: [] }]
+  })
+  const savePrice = await price.save()
+  const response = await restaurant.save()
+  res.json({
+    data: response,
+    status: 200,
+    msg: "Restaurant Added Successfully",
   })
 });
 //save a restaurant
