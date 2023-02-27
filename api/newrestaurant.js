@@ -493,5 +493,13 @@ router
     res.json(dash)
   });
 
+router.route("/getchefbyIdandupdatecartcount/:restaurant").get(async (req, res) => {
+  const response = await RestaurantDashboard.findOne({ restaurant_id: req.params.restaurant })
+  let { cartvisits, _id } = response;
+  cartvisits = parseInt(cartvisits) + 1;
+  const docs = await RestaurantDashboard.findByIdAndUpdate(_id, { cartvisits: cartvisits })
+  res.json(docs)
+});
+
 
 module.exports = router;

@@ -105,40 +105,6 @@ router.route("/getchefbyidandrevenue/:id").get(async (req, res) => {
 
 
 
-router
-  .route("/getchefbynameandupdatecartcount/:restaurant")
-  .get(function (req, res) {
-    RestaurantDashboard.findOne(
-      {
-        restaurant_id: req.params.restaurant,
-      },
-      function (err, response) {
-        if (!err) {
-          if (response !== null) {
-            let { cartVisit, _id } = response;
-            cartVisit = parseInt(cartVisit) + 1;
-            RestaurantDashboard.findByIdAndUpdate(
-              _id,
-              { cartVisit: cartVisit },
-              function (err, docs) {
-                res.json(docs);
-              }
-            );
-          } else {
-            let dashboard = {
-              restaurant_id: req.params.restaurant,
-              cartVisit: 1,
-            };
-            let dash = new RestaurantDashboard(dashboard);
-            dash.save().then((response) => {
-              res.json(response);
-            });
-          }
-        } else {
-          res.json(err);
-        }
-      }
-    );
-  });
+
 
 module.exports = router;
