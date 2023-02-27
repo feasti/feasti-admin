@@ -1,16 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const NewRestaurant = require("../models/newrest.model");
+const { add } = require('../utility/utility')
 const Orders = require("../models/orders.model");
 const Banner = require("../models/banners.model");
 const Users = require("../models/users.model");
 const Plan = require("../models/price_plan.model")
-
-const add = (accumulator, curr) => parseFloat(accumulator) + parseFloat(curr);
+const NewRestaurant = require("../models/newrest.model");
 
 // Chef Dashboard Data
-
-
 router.route("/getusertypesbyrestaurant/:restaurant").get(async (req, res) => {
   const { restaurant } = req.params;
   const myOrders = await Orders.find({ restaurant: restaurant });
@@ -106,39 +103,7 @@ router.route("/getchefbyidandrevenue/:id").get(async (req, res) => {
   });
 });
 
-router
-  .route("/getchefbynameandupdatemenucount/:restaurant")
-  .get(function (req, res) {
-    RestaurantDashboard.findOne(
-      {
-        restaurant_id: req.params.restaurant,
-      },
-      function (err, response) {
-        if (!err) {
-          if (response !== null) {
-            let { menuvisits, _id } = response;
-            menuvisits = parseInt(menuvisits) + 1;
-            RestaurantDashboard.findByIdAndUpdate(
-              _id,
-              { menuvisits: menuvisits },
-              function (err, docs) {
-                res.json(docs);
-              }
-            );
-          } else {
-            let dashboard = {
-              restaurant_id: req.params.restaurant,
-              menuvisits: 1,
-            };
-            let dash = new RestaurantDashboard(dashboard);
-            dash.save().then((response) => {
-              res.json(response);
-            });
-          }
-        }
-      }
-    );
-  });
+
 
 router
   .route("/getchefbynameandupdatecartcount/:restaurant")
