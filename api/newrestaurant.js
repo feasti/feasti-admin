@@ -305,6 +305,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const { restaurant_id } = req.params
   const myorders = await Orders.find({ restaurant_id: restaurant_id });
   const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant_id })
+  const { menuvisits, cartvisits } = await RestaurantDashboard.findOne({ restaurant_id: restaurant_id })
   const totalorders = myorders.length; //Total Orders
 
   let accepted = myorders.filter((item) => item.status === "accepted");
@@ -476,7 +477,9 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
     cancelledCount,
     rejectedCount,
     acceptanceRate,
-    rejectanceRate
+    rejectanceRate,
+    menuvisits,
+    cartvisits
   })
 });
 
