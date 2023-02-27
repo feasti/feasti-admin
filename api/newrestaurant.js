@@ -7,6 +7,7 @@ const Orders = require("../models/orders.model");
 const Price = require("../models/price_plan.model")
 const Coupon = require('../models/coupons.model')
 const Banner = require("../models/banners.model")
+const RestaurantDashboard = require('../models/restaurant_dashboard.model')
 
 
 
@@ -478,5 +479,16 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
     rejectanceRate
   })
 });
+
+router
+  .route("/getchefbyIdupdatemenucount/:restaurant")
+  .get(async (req, res) => {
+    const response = await RestaurantDashboard.findOne({ restaurant_id: req.params.restaurant })
+    let { menuvisits, _id } = response;
+    menuvisits = parseInt(menuvisits) + 1;
+    const dash = await RestaurantDashboard.findByIdAndUpdate(_id, { menuvisits: menuvisits })
+    res.json(dash)
+  });
+
 
 module.exports = router;
