@@ -3,9 +3,7 @@ const router = express.Router();
 const { add } = require('../utility/utility')
 const Orders = require("../models/orders.model");
 const Banner = require("../models/banners.model");
-const Users = require("../models/users.model");
-const Plan = require("../models/price_plan.model")
-const NewRestaurant = require("../models/newrest.model");
+
 
 // Chef Dashboard Data
 router.route("/getusertypesbyrestaurant/:restaurant").get(async (req, res) => {
