@@ -12,6 +12,12 @@ router.route("/").get(function (req, res) {
   });
 });
 
+router.route("/getcommission").get(async (req, res) => {
+  const { commission } = await Checkout.findOne({})
+  res.json({ status: 200, commission });
+
+});
+
 router.route("/").post(function (req, res) {
   let check = new Checkout(req.body);
   check
