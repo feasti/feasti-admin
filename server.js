@@ -42,6 +42,12 @@ app.use(bodyParser({limit:"100mb"}));
 app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 app.use(express.json())
+let allowCrossDomain = function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', "*");
+  res.header('Access-Control-Allow-Headers', "*");
+  next();
+}
+app.use(allowCrossDomain)
 var allowedOrigins = ['http://localhost:3000',
   'https://feasti.com'];
 app.use(cors({
