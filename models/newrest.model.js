@@ -80,6 +80,7 @@ let NewRestaurant = new Schema({
     },
   ],
   isDelivery: Boolean,
+  taxes: { type: String },
   price_plans: Array
 });
 
