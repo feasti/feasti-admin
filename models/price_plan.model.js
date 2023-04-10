@@ -10,6 +10,7 @@ let PricePlans = new Schema({
             {
                 plan_name: String,
                 base_price: String,
+                profit_margin: String,
                 customer_price: String,
                 delivery_price: String,
             }

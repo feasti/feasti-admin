@@ -15,32 +15,32 @@ router.route("/").get(function (req, res) {
     }
   });
 });
+router.route("/getPending").get(async (req, res) => {
+  const response = await Partner.find({ status: "Pending" }).sort({ created_at: -1 })
+  const numRequests = response.length
+  res.json({
+    status: 200,
+    partnerRequests: response,
+    numRequests: numRequests,
+    msg: "Requests fetched"
+  })
+})
 
-router.route("/").post(function (req, res) {
-  Partner.findOne({ phone: req.body.phone },function (err,partners) {
-      if (partners === null) {
-        let partner = new Partner(req.body);
-        partner
-          .save()
-          .then((partner) => {
-            res.json({
-              status: 200,
-              data: partner,
-              msg: "Request Submitted successfully",
-            });
-          })
-          .catch((err) => {
-            res.json({
-              status: 404,
-              data: err,
-              msg: "Adding new partner failed",
-            });
-          });
-      } else {
-        res.json({ status: 403, data: [], msg: "You have already requested" });
-      }
-  });
-
+router.route("/").post(async function (req, res) {
+  const { phone } = req.body
+  const partners = await Partner.findOne({ phone: phone })
+  if (partners === null) {
+    let partner = new Partner(req.body)
+    const response = await partner.save()
+    res.json({
+      status: 200,
+      data: response,
+      msg: "Request Submitted Successfully"
+    })
+  }
+  else {
+    res.json({ status: 403, data: [], msg: "You have already requested" });
+  }
 });
 //save a singe partner to database
 
@@ -78,14 +78,9 @@ router.put("/:id", function (req, res, next) {
 });
 //update a partner
 
-router.route("/:id").delete((req, res, next) => {
-  Partner.findByIdAndDelete(req.params.id, (err, data) => {
-    if (err) {
-      res.json({ data: err, msg: "Request Not Found", status: 404 });
-    } else {
-      res.json({ data: data, msg: "Request Deleted", status: 200 });
-    }
-  });
+router.route("/:id").delete(async (req, res) => {
+  const response = await Partner.findByIdAndDelete(req.params.id)
+  res.json({ data: response, msg: "Request Deleted", status: 200 });
 });
 
 router.route("/").delete((req, res, next) => {
