@@ -76,8 +76,9 @@ router.route("/pay/:currency").post(async (req, res) => {
   const { token, amount, user_id, restaurant_id, plan_name } = req.body;
   const currency = req.params.currency
   try {
+    let charge = null
     if (currency === 'CAD') {
-      const charge = await stripe.charges.create({
+      charge = await stripe.charges.create({
         amount: amount * 100,
         currency: 'CAD',
         description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
@@ -88,9 +89,8 @@ router.route("/pay/:currency").post(async (req, res) => {
           plan_name: plan_name,
         },
       });
-      res.send(charge);
     } else {
-      const charge = await stripe_us.charges.create({
+      charge = await stripe_us.charges.create({
         amount: amount * 100,
         currency: 'USD',
         description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
@@ -101,8 +101,8 @@ router.route("/pay/:currency").post(async (req, res) => {
           plan_name: plan_name,
         },
       });
-      res.send(charge);
     }
+    res.send(charge);
   } catch (err) {
     res.send(err)
   }
