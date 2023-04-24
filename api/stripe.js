@@ -79,7 +79,7 @@ router.route("/pay/:currency").post(async (req, res) => {
     let charge = null
     if (currency === 'CAD') {
       charge = await stripe.charges.create({
-        amount: parseFloat(amount * 100).toFixed(2),
+        amount: parseInt(amount * 100),
         currency: 'CAD',
         description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
         source: token,
@@ -91,7 +91,7 @@ router.route("/pay/:currency").post(async (req, res) => {
       });
     } else {
       charge = await stripe_us.charges.create({
-        amount: parseFloat(amount * 100).toFixed(2),
+        amount: parseInt(amount * 100),
         currency: 'USD',
         description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
         source: token,
