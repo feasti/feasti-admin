@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_CANADA, {
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_CANADA_LIVE, {
   apiVersion: "2020-08-27",
   appInfo: {
     name: "feasti dash inc",
@@ -10,7 +10,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_CANADA, {
   },
 });
 
-const stripe_us = require("stripe")(process.env.STRIPE_SECRET_KEY_US_TEST, {
+const stripe_us = require("stripe")(process.env.STRIPE_PUBLISHABLE_KEY_US_LIVE, {
   apiVersion: "2020-08-27",
   appInfo: {
     name: "feasti dash inc",
@@ -79,7 +79,7 @@ router.route("/pay/:currency").post(async (req, res) => {
     let charge = null
     if (currency === 'CAD') {
       charge = await stripe.charges.create({
-        amount: amount * 100,
+        amount: parseFloat(amount * 100).toFixed(2),
         currency: 'CAD',
         description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
         source: token,
@@ -91,7 +91,7 @@ router.route("/pay/:currency").post(async (req, res) => {
       });
     } else {
       charge = await stripe_us.charges.create({
-        amount: amount * 100,
+        amount: parseFloat(amount * 100).toFixed(2),
         currency: 'USD',
         description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
         source: token,
@@ -102,6 +102,9 @@ router.route("/pay/:currency").post(async (req, res) => {
         },
       });
     }
+    console.log('====================================');
+    console.log(charge);
+    console.log('====================================');
     res.send(charge);
   } catch (err) {
     res.send(err)
