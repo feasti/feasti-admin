@@ -52,13 +52,13 @@ router.route("/login").post(async (req, res) => {
   let restaurant = await NewRestaurant.findOne({ $and: [{ phone: req.body.phone }, { $ne: { status: 'unapproved' } }] }).exec();
   const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
   const { price_plans, isDelivery } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
-  const coupon = await Coupon.findOne({ restaurant_id: restaurant.restaurant_id, status: "Active" })
+  // const coupon = await Coupon.findOne({ restaurant_id: restaurant.restaurant_id, status: "Active" })
   restaurant.meals = meals
   restaurant.isDelivery = isDelivery
   restaurant.price_plans = price_plans
   restaurant.promo = coupon
   if (restaurant) {
-    res.json({ status: 200, data: restaurant, coupon });
+    res.json({ status: 200, data: restaurant });
   } else {
     res.json({ status: 404 });
   }
