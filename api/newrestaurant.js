@@ -468,6 +468,8 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   res.json({
     totalSales,
     totalRevenue,
+    singleMeals,
+    planwiseOrders,
     allRevenue,
     totalorders,
     acceptedCount,
