@@ -1,13 +1,21 @@
-const cron = require('node-cron')
-const moment = require('moment')
-const Orders = require('../models/orders.model')
-const NewRestaurant = require('../models/newrest.model')
-const currentOrder = require('../models/currentorders.model')
+const cron = require('node-cron');
+const moment = require('moment');
+const Orders = require('../models/orders.model'); // Replace with your Orders model
 
+const job = cron.schedule('0 0 * * *', async () => {
+    const today = moment().startOf('day');
+    const filter = {
+        $or: [
+            { status: 'pending', start_date: today },
+            { status: 'accepted', start_date: today }
+        ]
+    };
+    const update = { status: 'started' };
+    const options = { multi: true };
 
-const job = cron.schedule('*/2 * * * *', async () => {
-    const today = moment().format('DD-MMM-YYYY')
-    await Orders.find({ $and: [{ start_date: today }, { $or: [{ status: 'pending' }, { status: 'pending' }] }] }).updateMany({}, { $set: { status: 'started' } })
+    const result = await Orders.updateMany(filter, update, options);
+
+    console.log(`Updated ${result.nModified} orders to started`);
 });
 
 module.exports = job
