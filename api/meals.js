@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Meals = require('../models/meals.model')
+const Restaurant = require('../models/newrest.model')
 
 router.route("/").get(async function (req, res) {
     const meals = await Meals.find({})
@@ -9,11 +10,12 @@ router.route("/").get(async function (req, res) {
 // get all restaurant for admin
 
 router.route("/:id/:type").get(async function (req, res) {
-    const { meals } = await Meals.findOne({ restaurant_id: req.params.id })
-    const { items } = meals.find(meal => meal.category === req.params.type)
+    const { id, type } = req.params
+    const { meals } = await Meals.findOne({ restaurant_id: id })
+    const { items } = meals.find(meal => type.localeCompare(meal.category))
     res.json(items)
 });
-// get all restaurant for admin
+// get all meals for a restaurant by its id for either lunch or dinner
 
 
 
@@ -25,7 +27,7 @@ router.route("/:id/:type").get(async function (req, res) {
 //         msg: "Deleted"
 //     })
 // });
-// //delete a restaurant
+// //delete a meal
 
 // router.route("/").post(async function (req, res) {
 //     let restaurant = new NewRestaurant(req.body);
@@ -36,7 +38,7 @@ router.route("/:id/:type").get(async function (req, res) {
 //         msg: "Restaurant Added Successfully",
 //     });
 // });
-// //save a restaurant
+// //save a meal
 
 // router.route("/:id").put(function (req, res, next) {
 //     NewRestaurant.findByIdAndUpdate(
@@ -48,7 +50,7 @@ router.route("/:id/:type").get(async function (req, res) {
 //         }
 //     );
 // });
-// //update a restaurant
+// //update a meal
 
 router.route("/:id").get(async function (req, res) {
     let { id } = req.params;
@@ -62,7 +64,7 @@ router.route("/:id").get(async function (req, res) {
     })
     res.json(restaurant)
 });
-//get specific restaurant
+//get specific meal
 
 
 

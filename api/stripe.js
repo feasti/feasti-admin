@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_CANADA_LIVE, {
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_CANADA_TEST, {
   apiVersion: "2020-08-27",
   appInfo: {
     name: "feasti dash inc",
@@ -10,7 +10,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_CANADA_LIVE, {
   },
 });
 
-const stripe_us = require("stripe")(process.env.STRIPE_SECRET_KEY_US_LIVE, {
+const stripe_us = require("stripe")(process.env.STRIPE_SECRET_KEY_US_TEST, {
   apiVersion: "2020-08-27",
   appInfo: {
     name: "feasti dash inc",
