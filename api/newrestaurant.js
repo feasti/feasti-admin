@@ -463,8 +463,11 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const completedCount = completed.length;
   const cancelledCount = cancelled.length;
   const rejectedCount = rejected.length;
-  const acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
-  const rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
+  let acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
+  acceptanceRate = isNaN(acceptanceRate) ? 0 : acceptanceRate
+  let rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
+  rejectanceRate = isNaN(rejectanceRate) ? 0 : rejectionRate
+
   res.json({
     totalSales,
     totalRevenue,
