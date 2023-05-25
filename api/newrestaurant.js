@@ -339,7 +339,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
     calculateRevenue(thirtyMeals, "30 Meals")
   ];
 
-  const statusTypes = ["pending", "started", "completed", "cancelled", "rejected"];
+  const statusTypes = ["pending", "accepted", "started", "completed", "cancelled", "rejected"];
   const statusCounts = statusTypes.reduce((acc, status) => {
     acc[`${status}Count`] = myorders.filter((item) => item.status === status).length;
     return acc;
