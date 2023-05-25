@@ -102,9 +102,6 @@ router.route("/pay/:currency").post(async (req, res) => {
         },
       });
     }
-    console.log('====================================');
-    console.log(charge);
-    console.log('====================================');
     res.send(charge);
   } catch (err) {
     res.send(err)
