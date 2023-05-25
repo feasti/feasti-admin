@@ -303,189 +303,75 @@ router.route("/getorders/:restaurant_id").get(async (req, res) => {
 
 router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   const { restaurant_id } = req.params
-  const myorders = await Orders.find({ restaurant_id: restaurant_id });
-  const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant_id })
-  const { menuvisits, cartvisits } = await RestaurantDashboard.findOne({ restaurant_id: restaurant_id })
+  const myorders = await Orders.find({ restaurant_id });
+  const { isDelivery, price_plans } = await Price.findOne({ restaurant_id })
+  const { menuvisits, cartvisits } = await RestaurantDashboard.findOne({ restaurant_id })
   const totalorders = myorders.length; //Total Orders
 
-  let accepted = myorders.filter((item) => item.status === "accepted");
-  let planwiseOrders = []
-  let singleMeals = []
-  let twoMeals = []
-  let sevenMeals = []
-  let fifteenMeals = []
-  let thirtyMeals = []
-  price_plans.filter((plan) => {
-    myorders.filter((order) => {
-      const { plans } = plan
-      if (order.category === plan.category && order.status !== "rejected") {
-        plans.filter((item) => {
-          if (item.plan_name === order.plan_name) {
-            let mealOrder = {}
-            mealOrder.plan_name = order.plan_name
-            mealOrder.discount = order.discount
-            mealOrder.base_price = order.base_price
-            mealOrder.delivery_fee = order.delivery_fee
-            planwiseOrders.push(mealOrder)
-          }
-        })
-      }
-    })
-  })
+  const accepted = myorders.filter(item => item.status === "accepted");
+  const planwiseOrders = myorders.filter(order => order.status !== "rejected")
+    .flatMap(order => price_plans.filter(plan => plan.category === order.category)
+      .flatMap(plan => plan.plans.filter(item => item.plan_name === order.plan_name)
+        .map(item => ({
+          plan_name: item.plan_name,
+          discount: order.discount,
+          base_price: order.base_price,
+          delivery_fee: order.delivery_fee
+        }))));
+  const singleMeals = planwiseOrders.filter(order => order.plan_name === "1 Meal");
+  const twoMeals = planwiseOrders.filter(order => order.plan_name === "2 Meals");
+  const sevenMeals = planwiseOrders.filter(order => order.plan_name === "7 Meals");
+  const fifteenMeals = planwiseOrders.filter(order => order.plan_name === "15 Meals");
+  const thirtyMeals = planwiseOrders.filter(order => order.plan_name === "30 Meals");
 
-  planwiseOrders.map((planwiseorder) => {
-    if (planwiseorder.plan_name === "1 Meal" && planwiseorder.status !== "rejected") {
-      singleMeals.push(planwiseorder)
-    }
-    if (planwiseorder.plan_name === "2 Meals" && planwiseorder.status !== "rejected") {
-      twoMeals.push(planwiseorder)
-    }
-    if (planwiseorder.plan_name === "7 Meals" && planwiseorder.status !== "rejected") {
-      sevenMeals.push(planwiseorder)
-    }
-    if (planwiseorder.plan_name === "15 Meals" && planwiseorder.status !== "rejected") {
-      fifteenMeals.push(planwiseorder)
-    }
-    if (planwiseorder.plan_name === "30 Meals" && planwiseorder.status !== "rejected") {
-      thirtyMeals.push(planwiseorder)
-    }
-  })
-
-  let allRevenue = []
-  let revenue = {}
-  let singelMealBasePrice = singleMeals.map((item) => item.base_price);
-  let singleMealRevenue = singelMealBasePrice.reduce(add, 0);
-  let singelMealDelivery = singleMeals.map((item) => item.delivery_fee);
-  singelMealDelivery = singelMealDelivery.filter((x) => Number(x))
-  let singleDeliveryFee = singelMealDelivery.reduce(add, 0);
-  let singelMealDiscount = singleMeals.map((item) => item.discount);
-  let singleDiscount = singelMealDiscount.reduce(add, 0);
-  revenue = {
-    plan_name: "1 Meal",
-    revenue: singleMealRevenue,
-    delivery_fee: singleDeliveryFee,
-    discount: singleDiscount
+  const calculateRevenue = (meals, planName) => {
+    const basePrice = meals.filter(item => item.plan_name === planName).map(item => item.base_price).reduce(add, 0);
+    const deliveryFee = meals.filter(item => item.plan_name === planName).map(item => item.delivery_fee).filter(x => Number(x)).reduce(add, 0);
+    const discount = meals.filter(item => item.plan_name === planName).map(item => item.discount).reduce(add, 0);
+    return { plan_name: planName, revenue: basePrice, delivery_fee: deliveryFee, discount: discount };
   }
-  allRevenue.push(revenue)
 
+  const allRevenue = [
+    calculateRevenue(accepted, "1 Meal"),
+    calculateRevenue(planwiseOrders, "2 Meals"),
+    calculateRevenue(sevenMeals, "7 Meals"),
+    calculateRevenue(fifteenMeals, "15 Meals"),
+    calculateRevenue(thirtyMeals, "30 Meals")
+  ];
 
-  let twoMealBasePrice = twoMeals.map((item) => item.base_price);
-  let twoMealRevenue = twoMealBasePrice.reduce(add, 0);
-  let twoMealDelivery = twoMeals.map((item) => item.delivery_fee);
-  twoMealDelivery = twoMealDelivery.filter((x) => Number(x))
-  let twoDeliveryFee = twoMealDelivery.reduce(add, 0);
-  let twoMealDiscount = twoMeals.map((item) => item.discount);
-  let twoDiscount = twoMealDiscount.reduce(add, 0);
-  revenue = {
-    plan_name: "2 Meals",
-    revenue: twoMealRevenue,
-    delivery_fee: twoDeliveryFee,
-    discount: twoDiscount
-  }
-  allRevenue.push(revenue)
+  const statusTypes = ["pending", "started", "completed", "cancelled", "rejected"];
+  const statusCounts = statusTypes.reduce((acc, status) => {
+    acc[`${status}Count`] = myorders.filter((item) => item.status === status).length;
+    return acc;
+  }, {});
 
-  let sevenMealBasePrice = sevenMeals.map((item) => item.base_price);
-  let sevenMealRevenue = sevenMealBasePrice.reduce(add, 0);
-  let sevenMealDelivery = sevenMeals.map((item) => item.delivery_fee);
-  sevenMealDelivery = sevenMealDelivery.filter(x => Number(x))
-  let sevenDeliveryFee = sevenMealDelivery.reduce(add, 0);
-  let sevenMealDiscount = sevenMeals.map((item) => item.discount);
-  let sevenDiscount = sevenMealDiscount.reduce(add, 0);
-  revenue = {
-    plan_name: "7 Meals",
-    revenue: sevenMealRevenue,
-    delivery_fee: sevenDeliveryFee,
-    discount: sevenDiscount
-  }
-  allRevenue.push(revenue)
-
-  let fifteenMealBasePrice = fifteenMeals.map((item) => item.base_price);
-  let fifteenMealRevenue = fifteenMealBasePrice.reduce(add, 0);
-  let fifteenMealDelivery = fifteenMeals.map((item) => item.delivery_fee);
-  fifteenMealDelivery = fifteenMealDelivery.filter(x => Number(x))
-  let fifteenDeliveryFee = fifteenMealDelivery.reduce(add, 0);
-  let fifteenMealDiscount = fifteenMeals.map((item) => item.discount);
-  let fifteenDiscount = fifteenMealDiscount.reduce(add, 0);
-  revenue = {
-    plan_name: "15 Meals",
-    revenue: fifteenMealRevenue,
-    delivery_fee: fifteenDeliveryFee,
-    discount: fifteenDiscount
-  }
-  allRevenue.push(revenue)
-
-  let thirtyMealBasePrice = thirtyMeals.map((item) => item.base_price);
-  let thirtyMealRevenue = thirtyMealBasePrice.reduce(add, 0);
-  let thirtyMealDelivery = thirtyMeals.map((item) => item.delivery_fee);
-  thirtyMealDelivery = thirtyMealDelivery.filter(x => Number(x))
-  let thirtyDeliveryFee = thirtyMealDelivery.reduce(add, 0);
-  let thirtyMealDiscount = thirtyMeals.map((item) => item.discount);
-  let thirtyDiscount = thirtyMealDiscount.reduce(add, 0);
-  revenue = {
-    plan_name: "30 Meals",
-    revenue: thirtyMealRevenue,
-    delivery_fee: thirtyDeliveryFee,
-    discount: thirtyDiscount
-  }
-  allRevenue.push(revenue)
-
-  const pending = myorders.filter((item) => item.status === "pending");
-  let started = myorders.filter((item) => item.status === "started");
-  const completed = myorders.filter((item) => item.status === "completed");
-  const cancelled = myorders.filter((item) => item.status === "cancelled");
-  const rejected = myorders.filter((item) => item.status === "rejected");
-
-  let totalSales = parseFloat(singleMealRevenue
-    + twoMealRevenue
-    + sevenMealRevenue
-    + fifteenMealRevenue
-    + thirtyMealRevenue)
-    + parseFloat(singleDeliveryFee
-      + twoDeliveryFee
-      + sevenDeliveryFee
-      + fifteenDeliveryFee
-      + thirtyDeliveryFee)
-    - parseFloat(singleDiscount
-      + twoDiscount
-      + sevenDiscount
-      + fifteenDiscount
-      + thirtyDiscount
-
-    )
-  let totalRevenue = parseFloat(singleMealRevenue
-    + twoMealRevenue
-    + sevenMealRevenue
-    + fifteenMealRevenue
-    + thirtyMealRevenue)
-  const acceptedCount = accepted.length;
-  const pendingCount = pending.length;
-  const startedCount = started.length;
-  const completedCount = completed.length;
-  const cancelledCount = cancelled.length;
-  const rejectedCount = rejected.length;
-  let acceptanceRate = parseFloat(((acceptedCount + startedCount + completedCount + cancelledCount) / totalorders) * 100).toFixed(2)
-  acceptanceRate = isNaN(acceptanceRate) ? 0 : acceptanceRate
-  let rejectanceRate = parseFloat((rejectedCount / totalorders) * 100).toFixed(2)
-  rejectanceRate = isNaN(rejectanceRate) ? 0 : rejectionRate
+  const totalRevenue = allRevenue.reduce((acc, item) => acc + item.revenue, 0);
+  const totalSales = totalRevenue + allRevenue.reduce((acc, item) => acc + item.delivery_fee, 0) - allRevenue.reduce((acc, item) => acc + item.discount, 0);
+  const acceptanceRate = ((statusCounts.acceptedCount + statusCounts.startedCount + statusCounts.completedCount + statusCounts.cancelledCount) / totalorders * 100 || 0).toFixed(2);
+  const rejectanceRate = ((statusCounts.rejectedCount / totalorders) * 100 || 0).toFixed(2);
 
   res.json({
     totalSales,
     totalRevenue,
     singleMeals,
+    twoMeals,
+    sevenMeals,
+    fifteenMeals,
+    thirtyMeals,
     planwiseOrders,
     allRevenue,
     totalorders,
-    acceptedCount,
-    pendingCount,
-    startedCount,
-    completedCount,
-    cancelledCount,
-    rejectedCount,
+    acceptedCount: statusCounts.acceptedCount,
+    pendingCount: statusCounts.pendingCount,
+    startedCount: statusCounts.startedCount,
+    completedCount: statusCounts.completedCount,
+    cancelledCount: statusCounts.cancelledCount,
+    rejectedCount: statusCounts.rejectedCount,
     acceptanceRate,
     rejectanceRate,
     menuvisits,
     cartvisits
-  })
+  });
 });
 
 router
