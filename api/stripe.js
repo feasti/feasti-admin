@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY_CANADA_TEST, {
+const stripe = require("stripe")("pk_live_51KammvB9SdGdzaTpIkJAtj4dhfOGUk1GYo4l9tTl4CYya4TQgZkmijukVNmdRuF920fnP5eJmpoAsVKvMlNTNwRb00lIFQ4nl0", {
   apiVersion: "2020-08-27",
   appInfo: {
     name: "feasti dash inc",
