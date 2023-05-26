@@ -203,102 +203,76 @@ router.route("/category/:food").get(async function (req, res) {
 
 router.route("/filterpickup/:food").get(async function (req, res) {
   const { food } = req.params;
-  const response = await NewRestaurant.find({ status: "Active" })
-  let restaurants = []
-  response.forEach(async (restaurant) => {
-    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
-    const { items } = meals.find(meal => meal.category === food)
-    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
-    const { plans } = price_plans.find((plan) => plan.category === food)
-    const promo = await Coupon.findOne({ $and: [{ restaurant_id: restaurant.restaurant_id }, { status: "Active" }] })
-    restaurant.meals = items
-    restaurant.price_plans = plans
-    restaurant.isDelivery = isDelivery
-    restaurant.promo = promo
-    restaurants.push(restaurant)
-  })
-  setTimeout(() => {
-    res.json(restaurants);
-  }, 8000)
-})
+  const restaurants = await NewRestaurant.find({ status: "Active" });
+  const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
+    const { items } = meals.find(meal => meal.category === food);
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
+    const { plans } = price_plans.find((plan) => plan.category === food);
+    const promo = await Coupon.findOne({ $and: [{ restaurant_id: restaurant.restaurant_id }, { status: "Active" }] });
+    restaurant.meals = items;
+    restaurant.price_plans = plans;
+    restaurant.isDelivery = isDelivery;
+    restaurant.promo = promo;
+    return restaurant;
+  }));
+  res.json(restaurantsWithItems);
+});
 // filter by lunch dinner
 
-router.route("/meal_type/:meal_type").get(async function (req, res) {
+router.get("/meal_type/:meal_type", async (req, res) => {
   const { meal_type } = req.params;
-  const restaurants = await NewRestaurant.find({ $and: [{ status: "Active" }, { meal_type: meal_type }] })
+  const restaurants = await NewRestaurant.find({ status: "Active", meal_type })
   res.json(restaurants)
-
 });
 // filter by veg non-veg
 
-router.route("/price/:order").get(function (req, res) {
+router.route("/price/:order").get(async function (req, res) {
   const order = req.params.order;
-  NewRestaurant.find(function (err, restaurants) {
-    if (!err) {
-      function compare(a, b) {
-        let p1 = a.plan.twoPlan.base_2price;
-        let p2 = b.plan.twoPlan.base_2price;
-        if (order === "asc") {
-          return parseFloat(p1) - parseFloat(p2);
-        } else {
-          return parseFloat(p2) - parseFloat(p1);
-        }
-      }
-      const filtered_restaurant = restaurants.sort(compare);
-      res.json(filtered_restaurant);
-    }
+  const restaurants = await NewRestaurant.find({});
+  const sortedRestaurants = restaurants.sort((a, b) => {
+    const p1 = parseFloat(a.plan.twoPlan.base_2price);
+    const p2 = parseFloat(b.plan.twoPlan.base_2price);
+    return order === "asc" ? p1 - p2 : p2 - p1;
   });
+  res.json(sortedRestaurants);
 });
 // filter by price
 
-router.route("/").delete((req, res, next) => {
-  NewRestaurant.deleteMany({}, (err, resp) => {
-    res.json({ msg: "All Deleted" });
-  });
+router.delete("/", async (req, res) => {
+  await NewRestaurant.deleteMany({});
+  res.json({ msg: "All Deleted" });
 });
 //delete all
 
 router.route("/push_promo").put(async (req, res) => {
-  const id = req.body._id;
-  const { coupon } = req.body;
-  NewRestaurant.findById(id, function (err, rest) {
+  const { _id, coupon } = req.body;
+  try {
+    const rest = await NewRestaurant.findById(_id);
     if (rest) {
       rest.promo.push(coupon);
-      rest
-        .save()
-        .then((rest) => rest)
-        .then((restaurant) => {
-          res.json({
-            statusText: "updated",
-            data: restaurant,
-            msg: "Coupon Added Successfully",
-          });
-        })
-        .catch((err) => {
-          res.status(400).send("adding new coupon failed");
-        });
+      const restaurant = await rest.save();
+      res.json({
+        statusText: "updated",
+        data: restaurant,
+        msg: "Coupon Added Successfully",
+      });
     } else {
       res.json({ statusText: "NF", msg: "Please login first to proceed" });
     }
-  });
+  } catch (err) {
+    res.status(400).send("adding new coupon failed");
+  }
 });
 //
 
 router.route("/getorders/:restaurant_id").get(async (req, res) => {
-  const response = await NewRestaurant.findOne({
-    restaurant_id: req.params.restaurant_id,
-  });
-  const profile_pic = await response.documents[1].banner_image;
-  const myorders = await Orders.find({
-    restaurant_id: req.params.restaurant_id,
-  });
-  const totalOrders = await myorders.length;
-  const meals = await response.meals;
-  res.json({
-    totalOrders: totalOrders,
-    meals: meals,
-    profile_pic: profile_pic,
-  });
+  const { restaurant_id } = req.params;
+  const response = await NewRestaurant.findOne({ restaurant_id });
+  const { banner_image } = response.documents[1];
+  const meals = response.meals;
+  const totalOrders = await Orders.countDocuments({ restaurant_id });
+  res.json({ totalOrders, meals, profile_pic: banner_image });
 });
 
 router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
@@ -374,22 +348,16 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   });
 });
 
-router
-  .route("/getchefbyIdupdatemenucount/:restaurant")
-  .get(async (req, res) => {
-    const response = await RestaurantDashboard.findOne({ restaurant_id: req.params.restaurant })
-    let { menuvisits, _id } = response;
-    menuvisits = parseInt(menuvisits) + 1;
-    const dash = await RestaurantDashboard.findByIdAndUpdate(_id, { menuvisits: menuvisits })
-    res.json(dash)
-  });
+router.route("/getchefbyIdupdatemenucount/:restaurant_id").get(async (req, res) => {
+  const { restaurant_id } = req.params;
+  const response = await RestaurantDashboard.findOneAndUpdate({ restaurant_id }, { $inc: { menuvisits: 1 } }, { new: true });
+  res.json(response);
+});
 
-router.route("/getchefbyIdandupdatecartcount/:restaurant").get(async (req, res) => {
-  const response = await RestaurantDashboard.findOne({ restaurant_id: req.params.restaurant })
-  let { cartvisits, _id } = response;
-  cartvisits = parseInt(cartvisits) + 1;
-  const docs = await RestaurantDashboard.findByIdAndUpdate(_id, { cartvisits: cartvisits })
-  res.json(docs)
+router.route("/getchefbyIdandupdatecartcount/:restaurant_id").get(async (req, res) => {
+  const { restaurant_id } = req.params;
+  const response = await RestaurantDashboard.findOneAndUpdate({ restaurant_id }, { $inc: { cartvisits: 1 } }, { new: true });
+  res.json(response);
 });
 
 
