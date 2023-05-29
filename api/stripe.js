@@ -1,21 +1,21 @@
 const express = require("express");
 const router = express.Router();
 
-const stripe = require("stripe")("pk_live_51KammvB9SdGdzaTpIkJAtj4dhfOGUk1GYo4l9tTl4CYya4TQgZkmijukVNmdRuF920fnP5eJmpoAsVKvMlNTNwRb00lIFQ4nl0", {
+const stripe = require("stripe")(process.env.STRIPE_PUBLISHABLE_KEY_CANADA_LIVE, {
   apiVersion: "2020-08-27",
   appInfo: {
     name: "feasti dash inc",
     version: "0.0.2",
-    url: "https://github.com/stripe-samples",
+    url: "https://feasti.com",
   },
 });
 
-const stripe_us = require("stripe")(process.env.STRIPE_SECRET_KEY_US_TEST, {
+const stripe_us = require("stripe")(process.env.STRIPE_PUBLISHABLE_KEY_US_LIVE, {
   apiVersion: "2020-08-27",
   appInfo: {
     name: "feasti dash inc",
     version: "0.0.2",
-    url: "https://github.com/stripe-samples",
+    url: "https://feasti.com",
   },
 });
 
