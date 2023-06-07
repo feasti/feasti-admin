@@ -78,6 +78,7 @@ app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
   res.setHeader('Access-Control-Allow-Origin', "*")
   res.setHeader('Access-Control-Allow-Headers', "application/json")
+  // req.headers["content-type"] = "multipart/form-data"
 });
 
 app.listen(port, () => {

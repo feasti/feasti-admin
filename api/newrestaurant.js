@@ -1,4 +1,8 @@
 const express = require("express");
+const fs = require('fs')
+const { promisify } = require('util')
+const path = require('path')
+const uploadFileToS3 = require('../utility/upload')
 const { add } = require('../utility/utility')
 const router = express.Router();
 const NewRestaurant = require("../models/newrest.model");
@@ -8,7 +12,16 @@ const Price = require("../models/price_plan.model")
 const Coupon = require('../models/coupons.model')
 const Banner = require("../models/banners.model")
 const RestaurantDashboard = require('../models/restaurant_dashboard.model')
+const mkdir = promisify(fs.mkdir)
+const multer = require('multer')
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage })
+const uploadFields = [
+  { name: 'banner_image', maxCount: 1 },
+  { name: 'profile_picture', maxCount: 1 },
+  { name: 'papers', maxCount: 5 }
+];
 
 
 router.route("/").get(async function (req, res) {
@@ -75,30 +88,52 @@ router.route("/:id").delete(async (req, res, next) => {
 });
 //delete a restaurant
 
-router.route("/").post(async function (req, res) {
-  const count = await NewRestaurant.count()
-  const restId = "REST".concat((count + 1).toString().padStart(4, "0"))
-  let restaurant = new NewRestaurant({ ...req.body, restaurant_id: restId });
-  let meals = new Meals({ restaurant_id: restId, meals: [{ category: "Lunch", items: [] }, { category: "Dinner", items: [] }] })
-  const saveMeals = await meals.save()
-  let price = new Price({
-    restaurant_id: restId,
-    isDelivery: false,
-    price_plans: [{ category: "Lunch", plans: [] }, { category: "Dinner", plans: [] }]
-  })
-  const savePrice = await price.save()
-  const response = await restaurant.save()
-  res.json({
-    data: response,
-    status: 200,
-    msg: "Restaurant Added Successfully",
-  })
+router.post("/", upload.fields(uploadFields), async (req, res) => {
+  const formdata = await req.body
+  const files = req.files
+  const { banner_image, profile_picture, papers } = files
+  console.log(formdata);
+  const count = await NewRestaurant.count();
+  const restId = `REST${(count + 1).toString().padStart(4, "0")}`;
+  const mealsData = { restaurant_id: restId, meals: [{ category: "Lunch", items: [] }, { category: "Dinner", items: [] }] };
+  const priceData = { restaurant_id: restId, isDelivery: false, price_plans: [{ category: "Lunch", plans: [] }, { category: "Dinner", plans: [] }] };
+  try {
+    // await mkdir(path.join(__dirname, 'meals', restId));
+
+    // Upload the banner image to the 'banners' folder with the restaurant ID as the filename
+    const bannerImageUrl = await uploadFileToS3(banner_image, 'banners', `${restId}.jpg`);
+
+    // Upload the profile picture to the 'profile_pictures' folder with the restaurant ID as the filename
+    const profilePictureUrl = await uploadFileToS3(profile_picture, 'profile_pictures', `${restId}.jpg`);
+
+    // Save the restaurant data to the database
+    const restaurant = await NewRestaurant.create({
+      ...formdata,
+      restaurant_id: restId,
+      documents: [
+        { banner_image: bannerImageUrl },
+        { profile_picture: profilePictureUrl }
+      ]
+    });
+    await Meals.create(mealsData);
+    await Price.create(priceData);
+    res.json({
+      data: restaurant,
+      status: 200,
+      bannerImageUrl,
+      profilePictureUrl,
+      msg: "Restaurant Added Successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Failed to add restaurant' })
+  }
 });
 //save a restaurant
 
-router.route("/:id").put(async function (req, res, next) {
-  const restaurant = await NewRestaurant.findByIdAndUpdate(req.params.id, req.body)
-  res.json(restaurant)
+router.put("/:id", async (req, res) => {
+  const restaurant = await NewRestaurant.findByIdAndUpdate(req.params.id, req.body);
+  res.json(restaurant);
 });
 //update a restaurant
 
@@ -139,43 +174,35 @@ router.route("/getchefbyId/:id").get(async (req, res) => {
 
 router.route("/cuisine_type/:cuisine").get(async function (req, res) {
   const { cuisine } = req.params;
-  const response = await NewRestaurant.find({ $and: [{ status: "Active" }, { cuisine_type: cuisine }] })
-  let restaurants = []
-  response.forEach(async (restaurant) => {
-    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
-    const { items } = meals.find(meal => meal.category === 'Lunch')
-    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
-    const { plans } = price_plans.find((plan) => plan.category === 'Lunch')
-    restaurant.meals = items
-    restaurant.price_plans = plans
-    restaurant.isDelivery = isDelivery
-    restaurants.push(restaurant)
-  })
-  setTimeout(() => {
-    res.json(restaurants);
-  }, 8000)
-
+  const restaurants = await NewRestaurant.find({ status: "Active", cuisine_type: cuisine });
+  const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
+    const { items } = meals.find(meal => meal.category === 'Lunch');
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
+    const { plans } = price_plans.find((plan) => plan.category === 'Lunch');
+    restaurant.meals = items;
+    restaurant.price_plans = plans;
+    restaurant.isDelivery = isDelivery;
+    return restaurant;
+  }));
+  res.json(restaurantsWithItems);
 });
 // filter by cuisine_type
 
 router.route("/searchbycity/:inputcity").get(async function (req, res) {
   const { inputcity } = req.params;
-  const response = await NewRestaurant.find({ $and: [{ status: "Active" }, { city: inputcity }] })
-  let restaurants = []
-  response.forEach(async (restaurant) => {
-    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
-    const { items } = meals.find(meal => meal.category === 'Lunch')
-    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
-    const { plans } = price_plans.find((plan) => plan.category === 'Lunch')
-    restaurant.meals = items
-    restaurant.price_plans = plans
-    restaurant.isDelivery = isDelivery
-    restaurants.push(restaurant)
-  })
-  setTimeout(() => {
-    res.json(restaurants);
-  }, 8000)
-
+  const restaurants = await NewRestaurant.find({ status: "Active", city: inputcity });
+  const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
+    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
+    const { items } = meals.find(meal => meal.category === 'Lunch');
+    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
+    const { plans } = price_plans.find((plan) => plan.category === 'Lunch');
+    restaurant.meals = items;
+    restaurant.price_plans = plans;
+    restaurant.isDelivery = isDelivery;
+    return restaurant;
+  }));
+  res.json(restaurantsWithItems);
 });
 // filter by cuisine_type
 
@@ -222,8 +249,8 @@ router.route("/filterpickup/:food").get(async function (req, res) {
 
 router.get("/meal_type/:meal_type", async (req, res) => {
   const { meal_type } = req.params;
-  const restaurants = await NewRestaurant.find({ status: "Active", meal_type })
-  res.json(restaurants)
+  const restaurants = await NewRestaurant.find({ status: "Active", meal_type });
+  res.json(restaurants);
 });
 // filter by veg non-veg
 
@@ -348,17 +375,16 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
   });
 });
 
-router.route("/getchefbyIdupdatemenucount/:restaurant_id").get(async (req, res) => {
+router.get("/getchefbyIdupdatemenucount/:restaurant_id", async (req, res) => {
   const { restaurant_id } = req.params;
   const response = await RestaurantDashboard.findOneAndUpdate({ restaurant_id }, { $inc: { menuvisits: 1 } }, { new: true });
   res.json(response);
 });
 
-router.route("/getchefbyIdandupdatecartcount/:restaurant_id").get(async (req, res) => {
+router.get("/getchefbyIdandupdatecartcount/:restaurant_id", async (req, res) => {
   const { restaurant_id } = req.params;
   const response = await RestaurantDashboard.findOneAndUpdate({ restaurant_id }, { $inc: { cartvisits: 1 } }, { new: true });
   res.json(response);
 });
-
 
 module.exports = router;
