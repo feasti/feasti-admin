@@ -381,6 +381,26 @@ router.get("/getchefbyIdupdatemenucount/:restaurant_id", async (req, res) => {
   res.json(response);
 });
 
+function generateShareCode() {
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let sharecode = '';
+  for (let i = 0; i < 3; i++) {
+    sharecode += `${characters.charAt(Math.floor(Math.random() * characters.length))}${characters.charAt(Math.floor(Math.random() * characters.length))}`;
+    if (i < 2) {
+      sharecode += '-';
+    }
+  }
+  return sharecode;
+}
+
+router.get('/share/:restaurant_id', async (req, res) => {
+  const { restaurant_id } = req.params;
+  const response = await NewRestaurant.findOne({ restaurant_id });
+  response.sharecode = response.sharecode || generateShareCode();
+  await response.save();
+  res.json(response);
+});
+
 router.get("/getchefbyIdandupdatecartcount/:restaurant_id", async (req, res) => {
   const { restaurant_id } = req.params;
   const response = await RestaurantDashboard.findOneAndUpdate({ restaurant_id }, { $inc: { cartvisits: 1 } }, { new: true });
