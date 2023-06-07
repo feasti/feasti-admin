@@ -401,6 +401,11 @@ router.get('/share/:restaurant_id', async (req, res) => {
   res.json(response);
 });
 
+router.get('/getchefByShareCode/:sharecode', async (req, res) => {
+  const { _id } = await NewRestaurant.findOne({ sharecode: req.params.sharecode });
+  res.json(_id);
+})
+
 router.get("/getchefbyIdandupdatecartcount/:restaurant_id", async (req, res) => {
   const { restaurant_id } = req.params;
   const response = await RestaurantDashboard.findOneAndUpdate({ restaurant_id }, { $inc: { cartvisits: 1 } }, { new: true });
