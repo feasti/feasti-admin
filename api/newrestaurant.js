@@ -213,14 +213,16 @@ router.route("/category/:food").get(async function (req, res) {
   response.forEach(async (restaurant) => {
     const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
     const { items } = meals.find(meal => meal.category === food)
-    const promo = await Coupon.findOne({ $and: [{ restaurant_id: restaurant.restaurant_id }, { status: "Active" }] })
     const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
     const { plans } = price_plans.find((plan) => plan.category === food)
-    restaurant.meals = items
-    restaurant.price_plans = plans
-    restaurant.isDelivery = isDelivery
-    restaurant.promo = promo
-    restaurants.push(restaurant)
+    if (items.length > 0 && plans.length > 0) {
+      const promo = await Coupon.findOne({ $and: [{ restaurant_id: restaurant.restaurant_id }, { status: "Active" }] })
+      restaurant.meals = items
+      restaurant.price_plans = plans
+      restaurant.isDelivery = isDelivery
+      restaurant.promo = promo
+      restaurants.push(restaurant)
+    }
   })
   setTimeout(() => {
     res.json(restaurants);
