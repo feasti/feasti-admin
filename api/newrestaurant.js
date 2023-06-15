@@ -191,7 +191,8 @@ router.route("/cuisine_type/:cuisine").get(async function (req, res) {
 
 router.route("/searchbycity/:inputcity").get(async function (req, res) {
   const { inputcity } = req.params;
-  const restaurants = await NewRestaurant.find({ status: "Active", city: inputcity });
+  const regex = new RegExp(inputcity, "i");
+  const restaurants = await NewRestaurant.find({ status: "Active", city: { $regex: regex } });
   const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
     const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
     const { items } = meals.find(meal => meal.category === 'Lunch');
