@@ -15,7 +15,7 @@ const job = cron.schedule('0 0 * * *', async () => {
 
     const result = await Orders.updateMany(filter, update, options);
 
-    console.log(`Updated ${result.nModified} orders to started`);
+    console.log(`Updated ${result} orders to started`);
 });
 
 module.exports = job

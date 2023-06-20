@@ -7,7 +7,7 @@ const CurrentOrder = require("../models/currentorders.model")
 const Meals = require("../models/meals.model")
 const pdfTemplate = require("../receipt");
 // const pdf = require("html-pdf");
-const { add } = require('../utility/utility')
+const { add, sendOrderNotificationToChef } = require('../utility/utility')
 
 // router.route("/create-pdf/").post(async (req, res) => {
 //   pdf
@@ -39,6 +39,7 @@ router.route("/:id").get(async function (req, res) {
   res.json(order)
 });
 //get specific order
+
 router.route("/getOrderbyID/:id").get(async function (req, res) {
   const { id } = req.params;
   const order = await Order.findOne({ order_id: id })
@@ -175,6 +176,7 @@ router.route("/").post(async function (req, res) {
   const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
   const order = new Order({ ...orderToPlace, order_id: orderId })
   const response = await order.save()
+  await sendOrderNotificationToChef(orderToPlace.chefToken, orderId, orderToPlace.user_name)
   res.json({ data: response, msg: "Order Placed!", status: 200 });
 });
 //save a order
