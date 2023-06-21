@@ -84,7 +84,8 @@ let NewRestaurant = new Schema({
   isDelivery: Boolean,
   taxes: { type: String },
   price_plans: Array,
-  sharecode: String
+  sharecode: String,
+  token: String
 });
 
 module.exports = mongoose.model("NewRestaurant", NewRestaurant);
