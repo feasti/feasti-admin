@@ -1,43 +1,26 @@
 const express = require('express')
-const Admin=require("../models/admin.model")
+const Admin = require("../models/admin.model")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
-
 const router = express.Router();
 
-router.post("/signup", (req, res, next) => {
-    bcrypt.hash(req.body.password, 10).then(hash => {
-        const user = new Admin({
-            email: req.body.email,
-            password: hash
-        });
-        
-        Admin.findOne({ email: req.body.email }).then(user1 => {
-            if (user1) {
-                return res.status(401).json({
-                    message: "Admin Already Exist"
-                })
-            }
-            user.save().then(result => {
-                if (!result) {
-                    return res.status(500).json({
-                        message: "Error Creating USer"
-                    })
-                }
-                res.status(201).json({
-                    message: "User created!",
-                    result: result
-                });
-            })
-        })
-            .catch(err => {
-                res.status(500).json({
-                    error: err
-                });
-            });;
-    })
-
+router.post("/signup", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const hash = await bcrypt.hash(password, 10);
+        const admin = await Admin.findOne({ email });
+        if (admin) {
+            return res.status(401).json({ message: "Admin Already Exist" });
+        }
+        const user = new Admin({ email, password: hash });
+        const result = await user.save();
+        if (!result) {
+            return res.status(500).json({ message: "Error Creating User" });
+        }
+        res.status(201).json({ message: "User created!", result });
+    } catch (error) {
+        res.status(500).json({ error });
+    }
 });
 
 
