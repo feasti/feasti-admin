@@ -8,14 +8,10 @@ const RestaurantDashboard = require("../models/restaurant_dashboard.model");
 const Payoutcycle = require("../models/payoutcylce.model");
 const Transaction = require("../models/transactions.model");
 const Banners = require("../models/banners.model")
-
+const { add } = require("../utility/utility")
 router.route("/").get(async (req, res) => {
-  const restaurants = await NewRestaurant.find(
-    {},
-    { restaurant_id: 1, restaurant_name: 1, email: 1 }
-  );
-  const orders = await Orders.find(
-    { status: { $ne: "rejected" } },
+  const restaurants = await NewRestaurant.find({}, { restaurant_id: 1, restaurant_name: 1, email: 1 });
+  const orders = await Orders.find({ status: { $ne: "rejected" } },
     {
       order_id: 1,
       restaurant_id: 1,
@@ -28,9 +24,6 @@ router.route("/").get(async (req, res) => {
       promo_id: 1,
     }
   );
-  function add(accumulator, a) {
-    return parseFloat(accumulator) + parseFloat(a);
-  }
   const dashboard = await RestaurantDashboard.find(
     {},
     { restaurant_id: 1, banners: 1, coupons: 1 }
@@ -344,7 +337,7 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
       .map((order) => order.discount);
     let totalDiscount = discounts.reduce(add, 0);
     let AdOnsCommission = totalAddOnRevenue * 0.1;
- 
+
     let dues = banners
       .filter(
         (item) =>
