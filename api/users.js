@@ -4,6 +4,7 @@ const Users = require("../models/users.model");
 const NewRestaurant = require("../models/newrest.model");
 const Meals = require('../models/meals.model')
 const Price = require("../models/price_plan.model")
+const pusher = require('../utility/messaging')
 
 router.route("/").get(async (req, res) => {
   const users = await Users.find({})
@@ -19,9 +20,12 @@ router.route("/").post(async function (req, res) {
   }
   else {
     const count = await Users.count()
-    const userId = "USER".concat((count+1).toString().padStart(4, "0"))
+    const userId = "USER".concat((count + 1).toString().padStart(4, "0"))
     const user = new Users({ phone: phone, user_id: userId });
     const response = await user.save()
+    pusher.trigger("my-channel", "my-event", {
+      message: "New User Created"
+    })
     res.json({
       status: 200,
       data: response,

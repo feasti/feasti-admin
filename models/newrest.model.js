@@ -15,7 +15,7 @@ let NewRestaurant = new Schema({
   country: { type: String },
   postal_code: { type: String },
   commission: { type: String },
-  cuisine_type: { type: String },
+  cuisine_type: { type: Array },
   banner_image: String,
   profile_picture: String,
   documents: {

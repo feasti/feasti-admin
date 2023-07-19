@@ -174,7 +174,8 @@ router.route("/getchefbyId/:id").get(async (req, res) => {
 
 router.route("/cuisine_type/:cuisine").get(async function (req, res) {
   const { cuisine } = req.params;
-  const restaurants = await NewRestaurant.find({ status: "Active", cuisine_type: cuisine });
+  let restaurants = await NewRestaurant.find({});
+  restaurants = restaurants.filter(restaurant => restaurant.cuisine_type.includes(cuisine) && restaurant.status === "Active");
   const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
     const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
     const { items } = meals.find(meal => meal.category === 'Lunch');
@@ -185,9 +186,15 @@ router.route("/cuisine_type/:cuisine").get(async function (req, res) {
     restaurant.isDelivery = isDelivery;
     return restaurant;
   }));
-  res.json(restaurantsWithItems);
+
+  // Filter restaurants based on cuisine type
+  const filteredRestaurants = restaurantsWithItems.filter(restaurant =>
+    restaurant.cuisine_type.includes(cuisine)
+  );
+
+  res.json(filteredRestaurants);
 });
-// filter by cuisine_type
+
 
 router.route("/searchbycity/:inputcity").get(async function (req, res) {
   const { inputcity } = req.params;
