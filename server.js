@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+// const Pusher = require('pusher')
 const path = require("path");
 const timeout=require("connect-timeout");
 require("./database/database");
@@ -78,7 +79,17 @@ app.use("/api/users", users);
 //     secret: "mysecret",
 //   })
 // );
+// const pusher = new Pusher({
+//   appId: "1630244",
+//   key: "5792e4bd07e747ad775e",
+//   secret: "31b678b2a366a32091da",
+//   cluster: "mt1",
+//   useTLS: true
+// });
 
+// pusher.trigger("my-channel", "my-event", {
+//   message: "hello world"
+// });
 app.use(express.static(path.join(__dirname, "./build/")));
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
