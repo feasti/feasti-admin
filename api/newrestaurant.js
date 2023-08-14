@@ -139,10 +139,10 @@ router.put("/:id", async (req, res) => {
 
 router.route("/:id").get(async function (req, res) {
   let { id } = req.params;
-  const restaurant = await NewRestaurant.findById(id)
+  const restaurant = await NewRestaurant.findById(id).populate('meals');
   const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id })
   const { price_plans, isDelivery } = await Price.findOne({ restaurant_id: restaurant.restaurant_id })
-  restaurant.meals = meals
+  // restaurant.meals = meals
   restaurant.isDelivery = isDelivery
   restaurant.price_plans = price_plans
   res.json(restaurant)
