@@ -38,10 +38,7 @@ let NewRestaurant = new Schema({
   phone: { type: String },
   restaurant_name: { type: String },
   status: { type: String, default: "Unapproved" },
-  meals: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Meals',
-  }],
+  meals: [],
   promo: [
     {
       promo_id: String,
