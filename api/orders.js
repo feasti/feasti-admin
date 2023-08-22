@@ -6,6 +6,7 @@ const NewRestaurant = require("../models/newrest.model");
 const CurrentOrder = require("../models/currentorders.model")
 const Meals = require("../models/meals.model")
 const pdfTemplate = require("../receipt");
+const pusher = require('../utility/messaging')
 // const pdf = require("html-pdf");
 const { add, sendOrderNotificationToChef } = require('../utility/utility')
 
@@ -177,6 +178,9 @@ router.route("/").post(async function (req, res) {
   const order = new Order({ ...orderToPlace, order_id: orderId })
   const response = await order.save()
   await sendOrderNotificationToChef(orderToPlace.chefToken, orderId, orderToPlace.user_name)
+  pusher.trigger("my-channel", "my-event", {
+    message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
+  })
   res.json({ data: response, msg: "Order Placed!", status: 200 });
 });
 //save a order

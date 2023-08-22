@@ -88,15 +88,35 @@ router.route("/:id").delete(async (req, res, next) => {
 });
 //delete a restaurant
 
+router.post('/create_chef_basic', async (req, res) => {
+  const count = await NewRestaurant.count();
+  const restId = `REST${(count + 1).toString().padStart(4, "0")}`;
+  const mealsData = { restaurant_id: restId, meals: [{ category: "Lunch", items: [] }, { category: "Dinner", items: [] }] };
+  const priceData = { restaurant_id: restId, isDelivery: false, price_plans: [{ category: "Lunch", plans: [] }, { category: "Dinner", plans: [] }] };
+  const restaurant = await NewRestaurant.create({ ...req.body, restaurant_id: restId });
+  await Meals.create({ ...mealsData });
+  await Price.create({ ...priceData });
+  res.json({
+    ...restaurant,
+    status: 200,
+    msg: "Restaurant Added Successfully",
+  });
+})
+
+router.put('/upload_docs/:id', upload.fields(uploadFields), async (req, res) => {
+  const { id } = req.params
+  const files = req.files
+  const { banner_image, profile_picture, papers } = files
+  
+  console.log(files,id);
+})
 router.post("/", upload.fields(uploadFields), async (req, res) => {
   const formdata = await req.body
   const files = req.files
   const { banner_image, profile_picture, papers } = files
   console.log(formdata);
-  const count = await NewRestaurant.count();
-  const restId = `REST${(count + 1).toString().padStart(4, "0")}`;
-  const mealsData = { restaurant_id: restId, meals: [{ category: "Lunch", items: [] }, { category: "Dinner", items: [] }] };
-  const priceData = { restaurant_id: restId, isDelivery: false, price_plans: [{ category: "Lunch", plans: [] }, { category: "Dinner", plans: [] }] };
+
+
   try {
     // await mkdir(path.join(__dirname, 'meals', restId));
 

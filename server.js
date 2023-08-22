@@ -34,6 +34,7 @@ const slot = require("./api/slots");
 const stripeintent = require("./api/stripe");
 const users = require("./api/users");
 const updater = require("./api/updater")
+const version = require("./api/version_control")
 // End of API imports
 
 const app = express();
@@ -68,6 +69,7 @@ app.use("/api/review", review);
 app.use("/api/slots", slot);
 app.use("/api/stripe", stripeintent);
 app.use("/api/users", users);
+app.use("/api/version", version);
 //End of Using API
 
 // app.use(
