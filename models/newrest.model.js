@@ -47,7 +47,7 @@ let NewRestaurant = new Schema({
       discount: String,
       discount_type: String,
       status: String,
-    },
+    }
   ],
   advert_id: { type: String },
   category: { type: String },
