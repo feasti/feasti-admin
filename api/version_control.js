@@ -23,6 +23,26 @@ router.post('/check-update', async (req, res) => {
     });
 });
 
+// Endpoint to check for updates in chef app
+router.post('/check-update-chef', async (req, res) => {
+    const { platform, currentVersion, app_name } = req.body;
+
+    // Query the database to get the latest version info for the platform
+    const latestVersionInfo = await Version.findOne({ $and: [{ platform }, { app_name }] }).sort('-releaseDate');
+
+    if (!latestVersionInfo || currentVersion === latestVersionInfo.versionNumber) {
+        // No update available
+        return res.json({ updateAvailable: false });
+    }
+
+    // Update available
+    return res.json({
+        updateAvailable: true,
+        latestVersion: latestVersionInfo.versionNumber,
+        releaseNotes: latestVersionInfo.releaseNotes,
+    });
+});
+
 // Define a route to insert sample data
 router.post('/insert-sample-data', async (req, res) => {
     try {
