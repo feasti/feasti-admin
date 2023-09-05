@@ -71,14 +71,24 @@ router.route("/pay/:currency").post(async (req, res) => {
   const { token, amount, user_id, restaurant_id, plan_name } = req.body;
   const currency = req.params.currency;
   try {
-    const charge = await (currency === 'CAD' ? stripe.charges.create : stripe_us.charges.create)({
-      amount: parseInt(amount * 100),
-      currency: currency === 'CAD' ? 'CAD' : 'USD',
-      description: `Amount of $${amount} has been received for ${plan_name} from ${user_id} `,
-      source: token,
-      metadata: { user_id, restaurant_id, plan_name }
-    });
-    res.send(charge);
+    let charge;
+    if (currency === 'CAD') {
+      charge = await stripe.charges.create({
+        amount: parseInt(amount * 100),
+        currency: 'CAD',
+        description: `Amount of $${amount} has been received for ${plan_name} from ${user_id}`,
+        source: token,
+        metadata: { user_id, restaurant_id, plan_name }
+      });
+    } else {
+      charge = await stripe_us.charges.create({
+        amount: parseInt(amount * 100),
+        currency: 'USD',
+        description: `Amount of $${amount} has been received for ${plan_name} from ${user_id}`,
+        source: token,
+        metadata: { user_id, restaurant_id, plan_name }
+      });
+    } res.send(charge);
   } catch (err) {
     res.send(err);
   }
