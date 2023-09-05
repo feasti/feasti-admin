@@ -60,6 +60,7 @@ let NewRestaurant = new Schema({
     },
   ],
   isDelivery: Boolean,
+  created_at: String,
   taxes: { type: String },
   price_plans: Array,
   sharecode: String,

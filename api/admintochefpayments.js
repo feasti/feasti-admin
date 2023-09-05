@@ -249,10 +249,16 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
   });
   const { account_number, bank_name, branch_number, institution_number, created_at } = restaurantDetails;
 
-  let pastpayouts = payoutcycle.filter((item) => moment(item.start_date).isAfter(moment(created_at))).map((item) => ({
-    start_date: item.start_date,
-    end_date: item.end_date,
-  }));
+  let pastpayouts = payoutcycle
+    .map((item) => ({
+      start_date: item.start_date,
+      end_date: item.end_date,
+    }))
+    .filter((item) => moment(item.end_date).isAfter(moment(created_at, 'DD-MMM-YYYY')));
+
+  // Replace 'YYYY-MM-DD' with the actual format of your dates if it's different.
+
+  // res.json({ pastpayouts, created_at, account_number, bank_name, branch_number, institution_number })
   const myorders = await Orders.find({
     $and: [
       { restaurant_id: req.params.rest_id },
