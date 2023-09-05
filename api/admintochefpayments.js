@@ -244,7 +244,12 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
   const payoutcycle = await Payoutcycle.find({ status: "expired" }, null, {
     sort: { start_date: -1 },
   });
-  let pastpayouts = payoutcycle.map((item) => ({
+  const restaurantDetails = await NewRestaurant.findOne({
+    restaurant_id: req.params.rest_id,
+  });
+  const { account_number, bank_name, branch_number, institution_number, created_at } = restaurantDetails;
+
+  let pastpayouts = payoutcycle.filter((item) => moment(item.start_date).isAfter(moment(created_at))).map((item) => ({
     start_date: item.start_date,
     end_date: item.end_date,
   }));
@@ -260,9 +265,7 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
       },
     ],
   });
-  const restaurantDetails = await NewRestaurant.findOne({
-    restaurant_id: req.params.rest_id,
-  });
+
   const transaction = await Transaction.find({
     restaurant_id: req.params.rest_id,
   });
@@ -346,16 +349,8 @@ router.route("/getpastpayout/:rest_id").get(async (req, res) => {
       )
       .map((item) => item.due);
     let dueAmt = dues.reduce(add, 0);
-    const { account_number, bank_name, branch_number, institution_number } =
-      restaurantDetails;
-    let chefBalance = parseFloat(
-      totalBaseIncome +
-      totalAddOnRevenue -
-      AdOnsCommission -
-      totalCommission -
-      totalDiscount -
-      dueAmt
-    ).toFixed(2);
+
+    let chefBalance = parseFloat(totalBaseIncome + totalAddOnRevenue - AdOnsCommission - totalCommission - totalDiscount - dueAmt).toFixed(2);
     return {
       restID: req.params.rest_id,
       account_number: account_number,
