@@ -1,9 +1,9 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-// const Pusher = require('pusher')
 const path = require("path");
 require("./database/database");
+// const Pusher = require('pusher')
 
 // const cookieSession = require("cookie-session");
 // End of important imports
@@ -11,7 +11,7 @@ require("./database/database");
 
 // Start of api imports
 const admincoupon = require("./api/admin-coupon");
-//const adminLogin = require("./api/admin-login");
+const adminLogin = require("./api/admin-login");
 const payout = require("./api/admintochefpayments");
 const banner = require("./api/bannerPlan");
 const calculations = require("./api/calculations");
@@ -47,7 +47,7 @@ app.use(cors());
 
 // Start Using APIs
 app.use("/api/admin-coupon", admincoupon);
-//app.use("/api/admin-login", adminLogin);
+app.use("/api/admin-login", adminLogin);
 app.use("/api/admintochefpayments", payout);
 app.use("/api/banner", banner);
 app.use("/api/calculations", calculations);

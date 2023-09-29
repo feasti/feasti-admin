@@ -6,52 +6,65 @@ const orders = require("../models/orders.model");
 const users = require("../models/users.model");
 const commissions = require("../models/checkout.model");
 const profit_margins = require("../models/plans.model");
+const Partners = require('../models/partnerrequest.model')
+const postalCodeData = require('../postalCodes.json')
 
-router.route("/restaurants").get(async function (req, res) {
-  let total = await restaurants.find();
-  total = total.length;
-  let active = await restaurants.find({ status: "Active" });
-  active = active.length;
-  let inactive = await restaurants.find({ status: "Inactive" });
-  inactive = inactive.length;
-  res.json({ inactive: inactive, active: active, totalrestaurants: total });
+router.route("/restaurants/:country").get(async function (req, res) {
+  const { country } = req.params;
+  const [inactive, active, unapproved, totalrestaurants] = await Promise.all([
+    restaurants.countDocuments({ status: "Inactive" }),
+    restaurants.countDocuments({ status: "Active" }),
+    restaurants.countDocuments({ status: "Unapproved" }),
+    restaurants.countDocuments({ country }),
+  ]);
+  res.json({ inactive, active, unapproved, totalrestaurants });
 });
 //get all restaurants
 
-router.route("/users").get(async function (req, res) {
-  let total = await users.find();
-  total = users.length;
-  let active = await users.find({ status: "Active" });
-  active = active.length;
-  let inactive = await users.find({ status: "Inactive" });
-  inactive = inactive.length;
-  res.json({ active: active, inactive: inactive, totalusers: total });
+
+router.route("/users/:country").get(async function (req, res) {
+  const { country } = req.params;
+  const totalusers = await users.countDocuments({ country });
+  const active = await users.countDocuments({ status: "Active" });
+  const inactive = await users.countDocuments({ status: "Inactive" });
+  res.json({ active, inactive, totalusers });
 });
 //get all users
 
-router.route("/orders").get(async function (req, res) {
-  let totalorders = await orders.find();
-  totalorders = totalorders.length;
-  let pendingorders = await orders.find({ status: "pending" });
-  pendingorders = pendingorders.length;
-  let acceptedorders = await orders.find({ status: "accepted" });
-  acceptedorders = acceptedorders.length;
-  let runningorders = await orders.find({ status: "started" });
-  runningorders = runningorders.length;
-  let completedorders = await orders.find({ status: "completed" });
-  completedorders = completedorders.length;
-  let rejectedorders = await orders.find({ status: "rejected" });
-  rejectedorders = rejectedorders.length;
-  res.json({
-    totalorders: totalorders,
-    pendingorders: pendingorders,
-    acceptedorders: acceptedorders,
-    runningorders: runningorders,
-    completedorders: completedorders,
-    rejectedorders: rejectedorders,
-  });
+router.route("/orders/count-by-country").get(async (req, res) => {
+  try {
+    const { country } = req.query;
+    const filter = { "address.country": country };
+    const count = await orders.countDocuments(filter);
+    const pendingOrders = await orders.countDocuments({ ...filter, status: "pending" });
+    const acceptedOrders = await orders.countDocuments({ ...filter, status: "accepted" });
+    const startedOrders = await orders.countDocuments({ ...filter, status: "started" });
+    const completedOrders = await orders.countDocuments({ ...filter, status: "completed" });
+    const rejectedOrders = await orders.countDocuments({ ...filter, status: "rejected" });
+    res.json({
+      count, pendingOrders, acceptedOrders, startedOrders, completedOrders, rejectedOrders
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 //get all orders
+
+// router.route('/partners/count-by-country').get(async function (req, res) {
+//   try {
+//     const { country_code } = req.query;
+
+//     // Filter partners by postal codes for the given country and count them
+//     const postalCodesForCountry = postalCodeData[country_code] || [];
+//     const filter = { postal_code: { $in: postalCodesForCountry }, status: "Pending" };
+//     const count = await Partners.countDocuments(filter);
+//     res.json({ count });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
 router.route("/revenue").get(async function (req, res) {
   function add(accumulator, a) {
