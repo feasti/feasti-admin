@@ -12,7 +12,7 @@ require("./database/database");
 
 // Start of api imports
 const admincoupon = require("./api/admin-coupon");
-//const adminLogin = require("./api/admin-login");
+const adminLogin = require("./api/admin-login");
 const payout = require("./api/admintochefpayments");
 const banner = require("./api/bannerPlan");
 const calculations = require("./api/calculations");
@@ -50,7 +50,7 @@ app.use(cors());
 
 // Start Using APIs
 app.use("/api/admin-coupon", admincoupon);
-//app.use("/api/admin-login", adminLogin);
+app.use("/api/admin-login", adminLogin);
 app.use("/api/admintochefpayments", payout);
 app.use("/api/banner", banner);
 app.use("/api/calculations", calculations);
@@ -76,11 +76,11 @@ app.use("/api/users", users);
 app.use("/api/version", version);
 //End of Using API
 
-// app.use(
-//   cookieSession({
-//     secret: "mysecret",
-//   })
-// );
+//app.use(
+  // cookieSession({
+    // secret: "mysecret",
+  //})
+//);
 // const pusher = new Pusher({
 //   appId: "1630244",
 //   key: "5792e4bd07e747ad775e",
