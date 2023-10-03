@@ -7,11 +7,9 @@ const Version = require('../models/version.model');
 router.post('/check-update', async (req, res) => {
     const { platform, currentVersion } = req.body;
 
-    // Query the database to get the latest version info for the platform
-    const latestVersionInfo = await Version.findOne({ platform }).sort('-releaseDate');
+    const latestVersionInfo = await Version.findOne({ $and: [{ platform }, { app_name: "feasti" }] }).sort('-releaseDate');
 
     if (!latestVersionInfo || currentVersion === latestVersionInfo.versionNumber) {
-        // No update available
         return res.json({ updateAvailable: false });
     }
 
