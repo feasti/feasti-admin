@@ -92,7 +92,7 @@ router.route("/revenue").get(async function (req, res) {
       const totalServiceFee = newOrders.reduce((total, item) => total + parseFloat(item.service_fee), 0).toFixed(2);
       const commission = 0;
       const tips = newOrders.reduce((total, item) => total + parseFloat(item.tip), 0).toFixed(2);
-      const taxes = newOrders.reduce((total, item) => total + parseFloat(item.taxes), 0).toFixed(2);
+      const taxes = newOrders.reduce((total, item) => total + parseFloat(item.tax), 0).toFixed(2);
       const discount = newOrders
         .filter((order) => order.promo_id === "PROMOADMIN")
         .reduce((total, order) => total + parseFloat(order.discount), 0).toFixed(2);
