@@ -2,7 +2,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
+<<<<<<< HEAD
 const timeout=require("connect-timeout");
+=======
+const apicache = require('apicache')
+>>>>>>> 17b98ee822796d2461e6eacab2735ae7f1e8d87a
 require("./database/database");
 // const Pusher = require('pusher')
 
@@ -39,10 +43,17 @@ const version = require("./api/version_control")
 // End of API imports
 
 const app = express();
+<<<<<<< HEAD
 const port = process.env.PORT || 4000;
 
 
 app.use(bodyParser({limit:"100mb"}));
+=======
+const cache = apicache.middleware;
+const port = process.env.PORT || 5000;
+
+app.use(cache('5 minutes'));
+>>>>>>> 17b98ee822796d2461e6eacab2735ae7f1e8d87a
 app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 app.use(express.json())
