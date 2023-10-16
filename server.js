@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const apicache = require('apicache')
 require("./database/database");
-// const Pusher = require('pusher')
+
 
 // const cookieSession = require("cookie-session");
 // End of important imports
@@ -80,17 +80,7 @@ app.use("/api/version", version);
 //     secret: "mysecret",
 //   })
 // );
-// const pusher = new Pusher({
-//   appId: "1630244",
-//   key: "5792e4bd07e747ad775e",
-//   secret: "31b678b2a366a32091da",
-//   cluster: "mt1",
-//   useTLS: true
-// });
 
-// pusher.trigger("my-channel", "my-event", {
-//   message: "hello world"
-// });
 app.use(express.static(path.join(__dirname, "./build/")));
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
