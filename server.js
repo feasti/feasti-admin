@@ -8,7 +8,7 @@ const timeout=require("connect-timeout");
 const apicache = require('apicache')
 >>>>>>> 17b98ee822796d2461e6eacab2735ae7f1e8d87a
 require("./database/database");
-// const Pusher = require('pusher')
+
 
 // const cookieSession = require("cookie-session");
 // End of important imports
@@ -87,6 +87,7 @@ app.use("/api/users", users);
 app.use("/api/version", version);
 //End of Using API
 
+<<<<<<< HEAD
 //app.use(
   // cookieSession({
     // secret: "mysecret",
@@ -99,10 +100,14 @@ app.use("/api/version", version);
 //   cluster: "mt1",
 //   useTLS: true
 // });
+=======
+// app.use(
+//   cookieSession({
+//     secret: "mysecret",
+//   })
+// );
+>>>>>>> 4090161b951a37a0def4af0cae6436fc8c43ef99
 
-// pusher.trigger("my-channel", "my-event", {
-//   message: "hello world"
-// });
 app.use(express.static(path.join(__dirname, "./build/")));
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
