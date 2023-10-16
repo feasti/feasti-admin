@@ -2,11 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
-<<<<<<< HEAD
-const timeout=require("connect-timeout");
-=======
+//const timeout=require("connect-timeout");
+
 const apicache = require('apicache')
->>>>>>> 17b98ee822796d2461e6eacab2735ae7f1e8d87a
 require("./database/database");
 
 
@@ -43,17 +41,10 @@ const version = require("./api/version_control")
 // End of API imports
 
 const app = express();
-<<<<<<< HEAD
-const port = process.env.PORT || 4000;
-
-
-app.use(bodyParser({limit:"100mb"}));
-=======
 const cache = apicache.middleware;
 const port = process.env.PORT || 5000;
 
 app.use(cache('5 minutes'));
->>>>>>> 17b98ee822796d2461e6eacab2735ae7f1e8d87a
 app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 app.use(express.json())
@@ -72,7 +63,6 @@ app.use("/api/cuisine", cuisine);
 app.use("/api/getcurrentorder", currentOrders);
 app.use("/api/meals", meals)
 app.use("/api/newrest", newrest);
-app.use(timeout("90s"))
 app.use("/api/orders", orders);
 app.use("/api/partnerrequest", partner);
 app.use("/api/payoutcycle", payoutcycle);
@@ -87,26 +77,12 @@ app.use("/api/users", users);
 app.use("/api/version", version);
 //End of Using API
 
-<<<<<<< HEAD
-//app.use(
-  // cookieSession({
-    // secret: "mysecret",
-  //})
-//);
-// const pusher = new Pusher({
-//   appId: "1630244",
-//   key: "5792e4bd07e747ad775e",
-//   secret: "31b678b2a366a32091da",
-//   cluster: "mt1",
-//   useTLS: true
-// });
-=======
 // app.use(
 //   cookieSession({
 //     secret: "mysecret",
 //   })
 // );
->>>>>>> 4090161b951a37a0def4af0cae6436fc8c43ef99
+
 
 app.use(express.static(path.join(__dirname, "./build/")));
 app.get("/*", (req, res) => {
