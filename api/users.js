@@ -314,4 +314,17 @@ router.route("/").delete((req, res, next) => {
 });
 //delete all users
 
+router.route("/x/delete-by-criteria").delete(async (req, res) => {
+  try {
+    const { addresses } = req.params;
+    console.log(addresses)
+    // Use your specific criteria to find and delete documents
+    // const result = await Users.deleteMany(addresses);
+
+    // res.json({ message: 'Deleted documents', result });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred' });
+  }
+})
+
 module.exports = router;

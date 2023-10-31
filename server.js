@@ -39,7 +39,7 @@ const version = require("./api/version_control")
 // End of API imports
 
 const app = express();
-const cache = apicache.middleware;
+// const cache = apicache.middleware;
 const port = process.env.PORT || 5000;
 
 // app.use(cache('5 minutes'));
@@ -86,7 +86,6 @@ app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
   res.setHeader('Access-Control-Allow-Origin', "*")
   res.setHeader('Access-Control-Allow-Headers', "application/json")
-  // req.headers["content-type"] = "multipart/form-data"
 });
 
 app.listen(port, () => {
