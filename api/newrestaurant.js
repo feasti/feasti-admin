@@ -107,8 +107,8 @@ router.put('/upload_docs/:id', upload.fields(uploadFields), async (req, res) => 
   const { id } = req.params
   const files = req.files
   const { banner_image, profile_picture, papers } = files
-  
-  console.log(files,id);
+
+  console.log(files, id);
 })
 router.post("/", upload.fields(uploadFields), async (req, res) => {
   const formdata = await req.body
@@ -194,8 +194,18 @@ router.route("/getchefbyId/:id").get(async (req, res) => {
 
 router.route("/cuisine_type/:cuisine").get(async function (req, res) {
   const { cuisine } = req.params;
-  let restaurants = await NewRestaurant.find({});
-  restaurants = restaurants.filter(restaurant => restaurant.cuisine_type.includes(cuisine) && restaurant.status === "Active");
+  let restaurants = await NewRestaurant.find({
+    status: "Active",
+    $or: [
+      {
+        "cuisine_type.0": cuisine
+      },
+      {
+        cuisine_type: cuisine
+      }
+    ]
+  });
+  // restaurants = restaurants.filter(restaurant => restaurant.cuisine_type.includes(cuisine) && restaurant.status === "Active");
   const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
     const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
     const { items } = meals.find(meal => meal.category === 'Lunch');

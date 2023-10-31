@@ -2,9 +2,12 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
+
 //const timeout=require("connect-timeout");
 
 //const apicache = require('apicache')
+
+// const apicache = require('apicache')
 require("./database/database");
 
 
@@ -41,10 +44,15 @@ const version = require("./api/version_control")
 // End of API imports
 
 const app = express();
+
 //const cache = apicache.middleware;
 const port = process.env.PORT || 4000;
 
 //app.use(cache('5 minutes'));
+// const cache = apicache.middleware;
+const port = process.env.PORT || 5000;
+
+// app.use(cache('5 minutes'));
 app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 app.use(express.json())
@@ -84,12 +92,13 @@ app.use("/api/version", version);
 // );
 
 
-app.use(express.static(path.join(__dirname, "./build/")));
+//app.use(express.static(path.join(__dirname, "./build/")));
+app.use(express.static(path.join(__dirname, "./build/*")));
+
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
   res.setHeader('Access-Control-Allow-Origin', "*")
   res.setHeader('Access-Control-Allow-Headers', "application/json")
-  // req.headers["content-type"] = "multipart/form-data"
 });
 
 app.listen(port, () => {
