@@ -196,6 +196,38 @@ router.route("/getchefbyId/:id").get(async (req, res) => {
 });
 //get specific restaurant by chef ID
 
+// router.route("/cuisine_type/:cuisine").get(async function (req, res) {
+//   const { cuisine } = req.params;
+//   let restaurants = await NewRestaurant.find({
+//     status: "Active",
+//     $or: [
+//       {
+//         "cuisine_type.0": cuisine
+//       },
+//       {
+//         cuisine_type: cuisine
+//       }
+//     ]
+//   });
+//   // restaurants = restaurants.filter(restaurant => restaurant.cuisine_type.includes(cuisine) && restaurant.status === "Active");
+//   const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
+//     const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
+//     const { items } = meals.find(meal => meal.category === 'Lunch');
+//     const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
+//     const { plans } = price_plans.find((plan) => plan.category === 'Lunch');
+//     restaurant.meals = items;
+//     restaurant.price_plans = plans;
+//     restaurant.isDelivery = isDelivery;
+//     return restaurant;
+//   }));
+
+//   // Filter restaurants based on cuisine type
+//   const filteredRestaurants = restaurantsWithItems.filter(restaurant =>
+//     restaurant.cuisine_type.includes(cuisine)
+//   );
+
+//   res.json(filteredRestaurants);
+// });
 router.route("/cuisine_type/:cuisine").get(async function (req, res) {
   const { cuisine } = req.params;
   let restaurants = await NewRestaurant.find({
@@ -209,15 +241,23 @@ router.route("/cuisine_type/:cuisine").get(async function (req, res) {
       }
     ]
   });
-  // restaurants = restaurants.filter(restaurant => restaurant.cuisine_type.includes(cuisine) && restaurant.status === "Active");
+
   const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
-    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
-    const { items } = meals.find(meal => meal.category === 'Lunch');
-    const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
-    const { plans } = price_plans.find((plan) => plan.category === 'Lunch');
-    restaurant.meals = items;
-    restaurant.price_plans = plans;
-    restaurant.isDelivery = isDelivery;
+    try {
+      const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
+      const { items } = meals.find(meal => meal.category === 'Lunch');
+      const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
+      const { plans } = price_plans.find((plan) => plan.category === 'Lunch');
+
+      restaurant.meals = items;
+      restaurant.price_plans = plans;
+      restaurant.isDelivery = isDelivery;
+    } catch (error) {
+      // Handle the error and set items and plans to null
+      restaurant.meals = null;
+      restaurant.price_plans = null;
+    }
+
     return restaurant;
   }));
 
@@ -226,7 +266,33 @@ router.route("/cuisine_type/:cuisine").get(async function (req, res) {
     restaurant.cuisine_type.includes(cuisine)
   );
 
-  res.json(filteredRestaurants);
+  // Search for 'Dinner' if 'Lunch' search failed
+  if (filteredRestaurants.length === 0) {
+    const restaurantsWithDinner = await Promise.all(restaurants.map(async (restaurant) => {
+      try {
+        const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
+        const { items } = meals.find(meal => meal.category === 'Dinner');
+        const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
+        const { plans } = price_plans.find((plan) => plan.category === 'Dinner');
+
+        restaurant.meals = items;
+        restaurant.price_plans = plans;
+        restaurant.isDelivery = isDelivery;
+      } catch (error) {
+        // Handle the error and set items and plans to null
+        restaurant.meals = null;
+        restaurant.price_plans = null;
+      }
+
+      return restaurant;
+    }));
+
+    res.json(restaurantsWithDinner.filter(restaurant =>
+      restaurant.cuisine_type.includes(cuisine)
+    ));
+  } else {
+    res.json(filteredRestaurants);
+  }
 });
 
 
