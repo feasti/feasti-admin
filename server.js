@@ -46,7 +46,7 @@ const version = require("./api/version_control")
 const app = express();
 
 //const cache = apicache.middleware;
-//const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4000;
 
 //app.use(cache('5 minutes'));
 // const cache = apicache.middleware;
