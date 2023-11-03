@@ -249,21 +249,21 @@ router.route("/cuisine_type/:cuisine").get(async function (req, res) {
       const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
       const { plans } = price_plans.find((plan) => plan.category === 'Lunch');
 
-      restaurant.meals = items;
-      restaurant.price_plans = plans;
-      restaurant.isDelivery = isDelivery;
+      // Check if meals and price_plans are not null before adding to the result
+      if (meals !== null && price_plans !== null) {
+        restaurant.meals = items;
+        restaurant.price_plans = plans;
+        restaurant.isDelivery = isDelivery;
+        return restaurant;
+      }
     } catch (error) {
-      // Handle the error and set items and plans to null
-      restaurant.meals = null;
-      restaurant.price_plans = null;
+      // Handle the error, but don't add the restaurant to the result
     }
-
-    return restaurant;
   }));
 
-  // Filter restaurants based on cuisine type
+  // Filter restaurants based on cuisine type and where meals and price_plans are not null
   const filteredRestaurants = restaurantsWithItems.filter(restaurant =>
-    restaurant.cuisine_type.includes(cuisine)
+    restaurant && restaurant.cuisine_type.includes(cuisine)
   );
 
   // Search for 'Dinner' if 'Lunch' search failed
@@ -275,25 +275,26 @@ router.route("/cuisine_type/:cuisine").get(async function (req, res) {
         const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
         const { plans } = price_plans.find((plan) => plan.category === 'Dinner');
 
-        restaurant.meals = items;
-        restaurant.price_plans = plans;
-        restaurant.isDelivery = isDelivery;
+        // Check if meals and price_plans are not null before adding to the result
+        if (meals !== null && price_plans !== null) {
+          restaurant.meals = items;
+          restaurant.price_plans = plans;
+          restaurant.isDelivery = isDelivery;
+          return restaurant;
+        }
       } catch (error) {
-        // Handle the error and set items and plans to null
-        restaurant.meals = null;
-        restaurant.price_plans = null;
+        // Handle the error, but don't add the restaurant to the result
       }
-
-      return restaurant;
     }));
 
     res.json(restaurantsWithDinner.filter(restaurant =>
-      restaurant.cuisine_type.includes(cuisine)
+      restaurant && restaurant.cuisine_type.includes(cuisine)
     ));
   } else {
     res.json(filteredRestaurants);
   }
 });
+
 
 
 router.route("/searchbycity/:inputcity").get(async function (req, res) {
