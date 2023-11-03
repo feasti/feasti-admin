@@ -50,7 +50,7 @@ const port = process.env.PORT || 4000;
 
 //app.use(cache('5 minutes'));
 // const cache = apicache.middleware;
-const port = process.env.PORT || 5000;
+//const port = process.env.PORT || 5000;
 
 // app.use(cache('5 minutes'));
 app.use(bodyParser.json({ limit: "100mb" }));
@@ -92,8 +92,8 @@ app.use("/api/version", version);
 // );
 
 
-//app.use(express.static(path.join(__dirname, "./build/")));
-app.use(express.static(path.join(__dirname, "./build/*")));
+app.use(express.static(path.join(__dirname, "./build/")));
+//app.use(express.static(path.join(__dirname, "./build/*")));
 
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
