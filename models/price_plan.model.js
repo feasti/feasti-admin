@@ -13,6 +13,7 @@ let PricePlans = new Schema({
                 profit_margin: String,
                 customer_price: String,
                 delivery_price: String,
+                activeDays: Array
             }
         ]
     }

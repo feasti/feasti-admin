@@ -372,7 +372,7 @@ router.route("/chefdashboard/:restaurant_id").get(async (req, res) => {
       .flatMap(plan => plan.plans.filter(item => item.plan_name === order.plan_name)
         .map(item => ({
           plan_name: item.plan_name,
-          discount: order.discount,
+          discount: (order.promo_id !== "PROMOADMIN") ? order.discount : 0, // Apply discount only if promo_id is not "PROMOADMIN"
           base_price: order.base_price,
           delivery_fee: order.delivery_fee
         }))));
