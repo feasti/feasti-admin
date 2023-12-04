@@ -6,40 +6,30 @@ const Banner = require("../models/banners.model");
 
 
 // Chef Dashboard Data
-router.route("/getusertypesbyrestaurant/:restaurant").get(async (req, res) => {
+router.route("/getUniqueUserTypesByRestaurant/:restaurant").get(async (req, res) => {
   const { restaurant } = req.params;
-  const myOrders = await Orders.find({ restaurant: restaurant });
-  const userids = myOrders.map((item) => item.user_id);
-  let uniq = [...new Set(userids)];
-  const countOccurrences = (arr, val) =>
-    arr.reduce((a, v) => (v === val ? a + 1 : a), 0);
-  let x = uniq.map((item) => countOccurrences(userids, item));
-  newUse = 0;
-  repeat = 0;
-  x.forEach((element) => {
-    if (element !== 1) {
-      repeat += 1;
-    } else {
-      newUse += 1;
-    }
-  });
+  const myOrders = await Orders.find({ restaurant });
+  const userIds = myOrders.map((item) => item.user_id);
+  const uniqueUserIds = [...new Set(userIds)];
+  const userOccurrences = uniqueUserIds.map((item) => userIds.filter(id => id === item).length);
+  const newUsers = userOccurrences.filter(element => element === 1).length;
+  const repeatedUsers = userOccurrences.length - newUsers;
   res.json({
-    newusers: uniq.length,
-    repeatedUsers: repeat,
-    more: x,
+    newUsers: uniqueUserIds.length,
+    repeatedUsers: repeatedUsers,
+    userOccurrences: userOccurrences,
   });
 });
 
-router.route("/").post(function (req, res) {
-  let order = new RestaurantDashboard(req.body);
-  order
-    .save()
-    .then((response) => {
-      res.json({ data: response, msg: "Dashboard Created", status: 200 });
-    })
-    .catch((err) => {
-      res.status(400).send("Failed");
-    });
+
+router.route("/").post(async (req, res) => {
+  try {
+    const order = new RestaurantDashboard(req.body);
+    const response = await order.save();
+    res.json({ data: response, msg: "Dashboard Created", status: 200 });
+  } catch (err) {
+    res.status(400).send("Failed");
+  }
 });
 //create a dashboard
 
@@ -51,58 +41,45 @@ router.route("/:restaurant_name/:id").put(async (req, res) => {
 });
 
 router.route("/getchefbyidandupdatebannercount/:id").get(async (req, res) => {
-  const response = await Banner.findOne({
-    promo_id: req.params.id,
-  });
-  let { clicks, due, rpc } = response;
-  clicks += 1;
-  due += parseFloat(rpc);
-  const update = await Banner.findByIdAndUpdate(
-    { _id: response._id },
-    { clicks: clicks, due: due }
+  const { id } = req.params;
+  const response = await Banner.findOneAndUpdate(
+    { promo_id: id },
+    { $inc: { clicks: 1 }, $inc: { due: parseFloat(rpc) } },
+    { new: true }
   );
-  res.json(update);
+  res.json(response);
 });
 
 router.route("/getchefbyidandrevenue/:id").get(async (req, res) => {
-  const response = await Banner.findOne({
-    promo_id: req.params.id,
-  });
+  const { id } = req.params;
+  const response = await Banner.findOne({ promo_id: id });
   const myOrders = await Orders.find({
-    $and: [
-      { promo_id: req.params.id },
-      {
-        $or: [
-          { status: "accepted" },
-          { status: "started" },
-          { status: "completed" },
-        ],
-      },
-    ],
+    promo_id: id,
+    status: { $in: ["accepted", "started", "completed"] },
   });
-  let prices = myOrders.map((item) => item.base_price);
-  let revenue = prices.reduce(add, 0);
 
-  let discounts = myOrders.map((item) => item.discount);
-  let discount = discounts.reduce(add, 0);
+  const { base_price, discount, user_id } = myOrders.reduce((acc, curr) => {
+    acc.base_price.push(curr.base_price);
+    acc.discount.push(curr.discount);
+    acc.user_id.add(curr.user_id);
+    return acc;
+  }, { base_price: [], discount: [], user_id: new Set() });
 
-  const userids = myOrders.map((item) => item.user_id);
-  let uniq = [...new Set(userids)];
+  const totalOrders = myOrders.length;
+  const revenue = base_price.reduce((acc, curr) => acc + curr, 0);
+  const totalDiscount = discount.reduce((acc, curr) => acc + curr, 0);
+  const uniqueUsers = user_id.size;
 
   res.json({
-    totalOrders: myOrders.length,
+    totalOrders,
     orders: myOrders,
     banner: response,
     due: response.due,
     clicks: response.clicks,
-    discount: discount,
-    revenue: revenue,
-    users: uniq.length,
+    discount: totalDiscount,
+    revenue,
+    users: uniqueUsers,
   });
 });
-
-
-
-
 
 module.exports = router;

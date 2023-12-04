@@ -3,43 +3,39 @@ const router = express.Router();
 const Coupon = require("../models/admincoupon.model");
 const Order = require("../models/orders.model")
 
-router.route("/").get(function (req, res) {
-    Coupon.find(async function (err, coupons) {
-        if (err) {
-            res.json(err);
-        } else {
-            function add(accumulator, a) {
-                return parseFloat(accumulator) + parseFloat(a);
-            }
-            let codes = coupons.map((item) => item.promo_code)
-            let orders = await Order.find({ promo_id: "PROMOADMIN" })
-            orders = orders.filter((item) => codes.indexOf(item.promo_code) > -1)
-            let prices = orders.map(item => item.price)
-            const sales = prices.reduce(add, 0)
-            let twoPlans = orders.filter(item => item.plan === "twoPlan")
-            let fifteenPlan = orders.filter(item => item.plan === "fifteenPlan")
-            let thirtyPlan = orders.filter(item => item.plan === "thirtyPlan")
-            res.json({
-                coupons: coupons,
-                numOrders: orders.length,
-                codes: codes,
-                sales: sales,
-                twoPlans: twoPlans.length,
-                fifteenPlan: fifteenPlan.length,
-                thirtyPlan: thirtyPlan.length
-            });
-        }
-    });
+router.route("/").get(async function (req, res) {
+    try {
+        const coupons = await Coupon.find();
+        const codes = coupons.map(item => item.promo_code);
+        const orders = await Order.find({ promo_id: "PROMOADMIN", promo_code: { $in: codes } });
+        const prices = orders.map(item => item.price);
+        const sales = prices.reduce((accumulator, a) => parseFloat(accumulator) + parseFloat(a), 0);
+        const twoPlans = orders.filter(item => item.plan === "twoPlan");
+        const fifteenPlan = orders.filter(item => item.plan === "fifteenPlan");
+        const thirtyPlan = orders.filter(item => item.plan === "thirtyPlan");
+        res.json({
+            coupons,
+            codes,
+            sales,
+            numOrders: orders.length,
+            twoPlans: twoPlans.length,
+            fifteenPlan: fifteenPlan.length,
+            thirtyPlan: thirtyPlan.length
+        });
+    } catch (err) {
+        res.json(err);
+    }
 });
 //get all coupons
 
-router.route("/:id").get(function (req, res) {
-    let id = req.params.id;
-    Coupon.findById({ _id: id }, function (err, coupon) {
-        if (!err) {
-            res.json(coupon);
-        }
-    });
+router.route("/:id").get(async (req, res) => {
+    const { id } = req.params;
+    try {
+        const coupon = await Coupon.findById(id);
+        res.json(coupon);
+    } catch (err) {
+        res.json(err);
+    }
 });
 //get specific coupon
 
@@ -51,39 +47,33 @@ router.route("/:id").put(async (req, res) => {
 });
 // update a coupon
 
-router.route("/abc").get(function (req, res) {
-    Coupon.find(function (err, coupons) {
-        if (err) {
-            res.json(err);
-        } else {
-            res.json(coupons);
-        }
-    });
+router.route("/abc").get(async (req, res) => {
+    try {
+        const coupons = await Coupon.find();
+        res.json(coupons);
+    } catch (err) {
+        res.json(err);
+    }
 });
 //get all coupons
 
-router.route("/").post(function (req, res) {
-    let coupon = new Coupon(req.body);
-    coupon
-        .save()
-        .then((coupon) => coupon)
-        .then((coupon) => {
-            res.json({ status: 200, data: coupon, msg: "Added a new admin coupon" });
-        })
-        .catch((err) => {
-            res.status(400).send("adding new Client failed");
-        });
+router.route("/").post(async (req, res) => {
+    try {
+        const coupon = await new Coupon(req.body).save();
+        res.json({ status: 200, data: coupon, msg: "Added a new admin coupon" });
+    } catch (err) {
+        res.status(400).send("adding new Client failed");
+    }
 });
 //save a singe coupon to database
 
-router.route("/:id").delete((req, res, next) => {
-    Coupon.findByIdAndDelete(req.params.id, (err, data) => {
-        if (err) {
-            res.status(200).json({ data: err });
-        } else {
-            res.json({ status: 200, data: data });
-        }
-    });
+router.route("/:id").delete(async (req, res) => {
+    try {
+        const data = await Coupon.findByIdAndDelete(req.params.id);
+        res.json({ status: 200, data: data });
+    } catch (err) {
+        res.status(200).json({ data: err });
+    }
 });
 //delete a coupon
 
