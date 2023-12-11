@@ -9,6 +9,8 @@ const pdfTemplate = require("../receipt");
 const pusher = require('../utility/messaging')
 // const pdf = require("html-pdf");
 const { add, sendOrderNotificationToChef } = require('../utility/utility')
+const twilio = require('twilio')
+const client = new twilio(process.env.ACC_SID_TWIL, process.env.AUTH_TOKEN_TWIL)
 
 // router.route("/create-pdf/").post(async (req, res) => {
 //   pdf
@@ -176,12 +178,22 @@ router.route("/").post(async function (req, res) {
   count = count + 1
   const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
   const order = new Order({ ...orderToPlace, order_id: orderId })
-  const response = await order.save()
-  await sendOrderNotificationToChef(orderToPlace.chefToken, orderId, orderToPlace.user_name)
+  const { phone } = order
+  await client.messages.create(
+    {
+      to: phone,
+      from: process.env.TWIL_NUMBER,
+      body: 'Hello Feastian! Hope you’re having a good day!'
+    });
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
-  res.json({ data: response, msg: "Order Placed!", status: 200 });
+
+  const response = await order.save()
+  await sendOrderNotificationToChef(orderToPlace.chefToken, orderId, orderToPlace.user_name)
+
+
+  res.json({ data: response, phone, msg: "Order Placed!", status: 200 });
 });
 //save a order
 
