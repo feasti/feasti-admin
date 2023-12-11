@@ -178,13 +178,19 @@ router.route("/").post(async function (req, res) {
   count = count + 1
   const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
   const order = new Order({ ...orderToPlace, order_id: orderId })
-  const { phone } = order
+  const { phone, restaurant_address } = order
   await client.messages.create(
     {
       to: phone,
       from: process.env.TWIL_NUMBER,
-      body: 'Hello Feastian! Hope you’re having a good day!'
+      body: 'Dear Customer, Feasti received your order! Currently processing it and will notify you upon acceptance by our kitchen partner. Thanks for choosing Feasti!'
     });
+  await client.messages.create({
+    to: restaurant_address.phone,
+    from: "+15005550006",
+    body: `New order from Feasti received. Respond within 45 mins to accept or reject.`
+  }
+  )
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
@@ -315,6 +321,12 @@ router.put("/changestatus/:id", async function (req, res, next) {
   const { id } = req.params
   const response = await Order.findByIdAndUpdate(id, req.body)
   const updateorder = await Order.findById(id)
+  await client.messages.create(
+    {
+      to: phone,
+      from: process.env.TWIL_NUMBER,
+      body: 'Great news! Your order has been approved by our kitchen partner.'
+    });
   res.json({
     status: 201,
     data: updateorder,
