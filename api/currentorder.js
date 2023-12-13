@@ -3,6 +3,8 @@ const router = express.Router();
 const Order = require("../models/orders.model");
 const currentOrders = require("../models/currentorders.model");
 const { response } = require("express");
+const twilio = require('twilio')
+const client = new twilio(process.env.ACC_SID_TWIL, process.env.AUTH_TOKEN_TWIL)
 
 router.route("/").get(function (req, res) {
   currentOrders.find(function (err, order) {
@@ -40,13 +42,21 @@ router.route("/getOrderDetails/:order_id").get(function (req, res, next) {
 });
 //get specific order
 
-router.put("/getandupdateorderstatus/:order_id", function (req, res, next) {
+router.put("/getandupdateorderstatus/:order_id", async function (req, res, next) {
   let { order_id } = req.params;
-  currentOrders.findOneAndUpdate(
+  const thisOrder = await Order.findOne({ order_id })
+  const { phone } = thisOrder
+  await currentOrders.findOneAndUpdate(
     { order_id: order_id },
     req.body,
     (err, response) => {
       if (!err) {
+        client.messages.create(
+          {
+            to: phone,
+            from: process.env.TWIL_NUMBER,
+            body: 'Your delicious meal has been successfully delivered. We hope you enjoy every bite!'
+          });
         res.json({ data: response, status: 200, msg: "Updated" });
       }
     }
