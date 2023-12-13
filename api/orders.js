@@ -315,13 +315,14 @@ router.route("/dashboard/:restaurant_id").get(async (req, res) => {
 });
 router.put("/changestatus/:id", async function (req, res, next) {
   const { id } = req.params
-  const response = await Order.findByIdAndUpdate(id, req.body)
+  const { status } = req.body
+  const response = await Order.findByIdAndUpdate(id, { status })
   const updateorder = await Order.findById(id)
   await client.messages.create(
     {
       to: updateorder.phone,
       from: process.env.TWIL_NUMBER,
-      body: 'Great news! Your order has been approved by our kitchen partner.'
+      body: `${status === 'accepted' ? 'Great news! Your order has been approved by our kitchen partner.' : "Unfortunately, our kitchen partner couldn't accept your order.Explore other options or contact us with any questions.Thank you!"}`
     });
   res.json({
     status: 201,
