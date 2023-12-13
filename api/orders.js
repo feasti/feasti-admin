@@ -199,6 +199,14 @@ router.route("/").post(async function (req, res) {
 });
 //save a order
 
+router.route("/checkExistingOrder/:user_id").post(async function (req, res) {
+  const { user_id } = req.params
+  const existingOrders = await Order.find({ user_id })
+  if (existingOrders.length > 0) {
+    res.json({ isOldUser: true })
+  }
+})
+
 router.route("/getorderbyuser/:id").get(async function (req, res) {
   let { id } = req.params;
   const orders = await Order.find({ user_id: id });
