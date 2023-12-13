@@ -202,12 +202,12 @@ router.route("/").post(async function (req, res) {
 router.route("/checkExistingOrder/:user_id").get(async function (req, res) {
   const { user_id } = req.params
   res.json({ user_id })
-  // const existingOrders = await Order.find({ user_id })
-  // if (existingOrders.length > 0) {
-  //   res.json({ isOldUser: true })
-  // } else {
-  //   res.json({ isOldUser: false })
-  // }
+  const existingOrders = await Order.find({ user_id })
+  if (existingOrders.length > 0) {
+    res.json({ isOldUser: true })
+  } else {
+    res.json({ isOldUser: false })
+  }
 })
 
 router.route("/getorderbyuser/:id").get(async function (req, res) {
