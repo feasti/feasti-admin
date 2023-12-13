@@ -185,12 +185,11 @@ router.route("/").post(async function (req, res) {
       from: process.env.TWIL_NUMBER,
       body: 'Dear Customer, Feasti received your order! Currently processing it and will notify you upon acceptance by our kitchen partner. Thanks for choosing Feasti!'
     });
-  await client.messages.create({
-    to: restaurant_address.phone,
-    from: "+15005550006",
-    body: `New order from Feasti received. Respond within 45 mins to accept or reject.`
-  }
-  )
+  //await client.messages.create({
+    //to: restaurant_address.phone,
+    //from: "+15005550006",
+    //body: `New order from Feasti received. Respond within 45 mins to accept or reject.`})
+	
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
