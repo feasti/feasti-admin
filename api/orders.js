@@ -188,17 +188,13 @@ router.route("/").post(async function (req, res) {
   await client.messages.create({
     to: restaurant_address.phone,
     from: process.env.TWIL_NUMBER,
-    body: `New order from Feasti received. Respond within 45 mins to accept or reject.`
+    body: 'New order from Feasti received. Respond within 45 mins to accept or reject.'
   })
-
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
-
   const response = await order.save()
   await sendOrderNotificationToChef(orderToPlace.chefToken, orderId, orderToPlace.user_name)
-
-
   res.json({ data: response, phone, msg: "Order Placed!", status: 200 });
 });
 //save a order
