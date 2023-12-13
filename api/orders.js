@@ -322,8 +322,8 @@ router.put("/changestatus/:id", async function (req, res, next) {
     {
       to: updateorder.phone,
       from: process.env.TWIL_NUMBER,
-      body: `${status === 'accepted' ? "Great news! Your order has been approved by our kitchen partner."
-        : "Unfortunately, our kitchen partner couldn't accept your order.Explore other options or contact us with any questions.Thank you!"}`
+      body: `${status === 'accepted' ? "A new order from Feasti has been received. Please reply within 45 minutes to confirm or decline. If there's no response from the chef, the order will be automatically rejected after the time expires."
+        : "Our kitchen partner couldn't accept your order. Explore other options or contact us. Thank you!"}`
     });
   res.json({
     status: 201,
