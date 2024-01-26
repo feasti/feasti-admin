@@ -211,8 +211,8 @@ router.route("/").post(async function (req, res) {
 
 router.route("/checkExistingOrder/:user_id").get(async function (req, res) {
   const { user_id } = req.params
-  res.json({ user_id })
-  const existingOrders = await Order.find({ user_id })
+//  res.json({ user_id })
+  const existingOrders = await Order.find({ user_id:user_id })
   if (existingOrders.length > 0) {
     res.json({ isOldUser: true })
   } else {
@@ -343,7 +343,7 @@ router.put("/changestatus/:id", async function (req, res, next) {
     {
       to: updateorder.phone,
       from: process.env.TWIL_NUMBER,
-      body: `${status === 'accepted' ? "A new order from Feasti has been received. Please reply within 45 minutes to confirm or decline. If there's no response from the chef, the order will be automatically rejected after the time expires."
+      body: `${status === 'accepted' ? "Great news! Your order has been approved by our kitchen partner"
         : "Our kitchen partner couldn't accept your order. Explore other options or contact us. Thank you!"}`
     });
   res.json({
