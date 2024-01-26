@@ -27,6 +27,16 @@ const client = new twilio(process.env.ACC_SID_TWIL, process.env.AUTH_TOKEN_TWIL)
 //   await res.sendFile(`${__dirname}/receipt.pdf`);
 // });
 
+router.route("/sendMessages/:phone").get(async (req, res) => {
+  const { phone } = req.params
+  let message = await client.messages.create({
+    to: phone,
+    from: process.env.TWIL_NUMBER,
+    body: 'This weekend avail maximum discount on your favorite appetizer.'
+  })
+  res.json(message)
+})
+
 router.route("/").get(function (req, res) {
   Order.find(function (err, order) {
     if (!err) {

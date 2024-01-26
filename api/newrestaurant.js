@@ -250,8 +250,8 @@ router.route("/searchbycity/:inputcity").get(async function (req, res) {
     return null;
   };
 
-  const filteredRestaurantsLunch = await Promise.all(restaurants.map(async restaurant => getRestaurantDetails(restaurant, 'Lunch')));
-  const filteredRestaurantsDinner = await Promise.all(restaurants.map(async restaurant => getRestaurantDetails(restaurant, 'Dinner')));
+  const filteredRestaurantsLunch = await Promise.all(restaurants.map(async restaurant => await getRestaurantDetails(restaurant, 'Lunch')));
+  const filteredRestaurantsDinner = await Promise.all(restaurants.map(async restaurant => await getRestaurantDetails(restaurant, 'Dinner')));
 
   // Filter out restaurants with null values for both lunch and dinner
   const filteredRestaurants = filteredRestaurantsLunch.concat(filteredRestaurantsDinner).filter(restaurant => restaurant);
@@ -285,22 +285,25 @@ router.route("/category/:food").get(async function (req, res) {
 })
 // filter by lunch dinner
 
-router.route("/filterpickup/:food").get(async function (req, res) {
-  const { food } = req.params;
-  const restaurants = await NewRestaurant.find({ status: "Active" });
-  const restaurantsWithItems = await Promise.all(restaurants.map(async (restaurant) => {
-    const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
-    const { items } = meals.find(meal => meal.category === food);
+const getRestaurantDetails = async (restaurant, category) => {
+  const { meals } = await Meals.findOne({ restaurant_id: restaurant.restaurant_id });
+  const meal = meals.find(meal => meal.category === category);
+  if (meal) {
+    const { items } = meal;
     const { isDelivery, price_plans } = await Price.findOne({ restaurant_id: restaurant.restaurant_id });
-    const { plans } = price_plans.find((plan) => plan.category === food);
-    const promo = await Coupon.findOne({ $and: [{ restaurant_id: restaurant.restaurant_id }, { status: "Active" }] });
-    restaurant.meals = items;
-    restaurant.price_plans = plans;
-    restaurant.isDelivery = isDelivery;
-    restaurant.promo = promo;
-    return restaurant;
-  }));
-  res.json(restaurantsWithItems);
+    const plan = price_plans.find(plan => plan.category === category);
+    if (items && isDelivery && plan) {
+      return { ...restaurant.toObject(), meals: items, price_plans: plan.plans, isDelivery };
+    }
+  }
+  return null;
+};
+
+router.route("/filterpickup/:category/:isDelivery").get(async function (req, res) {
+  const { category, isDelivery } = req.params;
+  const restaurants = await NewRestaurant.find({ status: "Active", category, isDelivery });
+  const filteredRestaurantsLunch = await Promise.all(restaurants.map(async restaurant => await getRestaurantDetails(restaurant, category)));
+  res.json(filteredRestaurantsLunch);
 });
 // filter by lunch dinner
 
