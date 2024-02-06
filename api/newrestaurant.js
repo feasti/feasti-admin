@@ -301,7 +301,7 @@ const getRestaurantDetails = async (restaurant, category) => {
 
 router.route("/filterpickup/:category/:isDelivery").get(async function (req, res) {
   const { category, isDelivery } = req.params;
-  const restaurants = await NewRestaurant.find({ status: "Active", category, isDelivery });
+  const restaurants = await NewRestaurant.find({ status: "Active", category:category, isDelivery:isDelivery });
   const filteredRestaurantsLunch = await Promise.all(restaurants.map(async restaurant => await getRestaurantDetails(restaurant, category)));
   res.json(filteredRestaurantsLunch);
 });
