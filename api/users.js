@@ -5,6 +5,9 @@ const NewRestaurant = require("../models/newrest.model");
 const Meals = require('../models/meals.model')
 const Price = require("../models/price_plan.model")
 const pusher = require('../utility/messaging')
+const AWS=require('aws-sdk');
+
+AWS.config.update({region:"us-east-1"});
 
 router.route("/").get(async (req, res) => {
   const users = await Users.find({})
@@ -15,7 +18,13 @@ router.route("/").get(async (req, res) => {
 router.route("/").post(async function (req, res) {
   const { phone } = req.body;
   const user = await Users.findOne({ phone: phone }).exec();
+	const params={
+		Message:"Welcome to Feasti!",
+		PhoneNumber:phone
+	}
   if (user) {
+	  const publishTextSMS= new AWS.SNS({apiVersion:"2010-03-31"}).publish(params).promise();
+	  await publishTextSMS
     return res.json({ status: 201, data: user, msg: "User Already Exists" });
   }
   else {
