@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
-const connection = process.env.MONGO_URL_PROD;
+const connection = process.env.MONGO_URL_AWS_PROD;
 mongoose
   .connect(connection, {
     useNewUrlParser: true,

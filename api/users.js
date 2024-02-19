@@ -24,7 +24,8 @@ router.route("/").post(async function (req, res) {
 	}
   if (user) {
 	  const publishTextSMS= new AWS.SNS({apiVersion:"2010-03-31"}).publish(params).promise();
-	  await publishTextSMS
+	  const messageResponse=await publishTextSMS
+	  console.log(messageResponse)
     return res.json({ status: 201, data: user, msg: "User Already Exists" });
   }
   else {
