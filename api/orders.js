@@ -7,25 +7,10 @@ const CurrentOrder = require("../models/currentorders.model")
 const Meals = require("../models/meals.model")
 const pdfTemplate = require("../receipt");
 const pusher = require('../utility/messaging')
-// const pdf = require("html-pdf");
 const { add, sendOrderNotificationToChef } = require('../utility/utility')
 const twilio = require('twilio')
 const client = new twilio(process.env.ACC_SID_TWIL, process.env.AUTH_TOKEN_TWIL)
 
-// router.route("/create-pdf/").post(async (req, res) => {
-//   pdf
-//     .create(pdfTemplate(req.body), {})
-//     .toFile(`${__dirname}/receipt.pdf`, (err) => {
-//       if (err) {
-//         console.log(err);
-//       }
-//       res.send(Promise.resolve());
-//     });
-// });
-
-// router.route("/fetch-pdf").get(async (req, res) => {
-//   await res.sendFile(`${__dirname}/receipt.pdf`);
-// });
 
 router.route("/sendMessages/:phone").get(async (req, res) => {
   const { phone } = req.params
@@ -189,17 +174,17 @@ router.route("/").post(async function (req, res) {
   const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
   const order = new Order({ ...orderToPlace, order_id: orderId })
   const { phone, restaurant_address } = order
- // await client.messages.create(
-   // {
-     // to: phone,
-      //from: process.env.TWIL_NUMBER,
-     // body: 'Dear Customer, Feasti received your order! Currently processing it and will notify you upon acceptance by our kitchen partner. Thanks for choosing Feasti!'
-    //});
- // await client.messages.create({
-   // to: restaurant_address.phone,
-    //from: process.env.TWIL_NUMBER,
-   // body: 'New order from Feasti received. Respond within 45 mins to accept or reject.'
- // })
+  // await client.messages.create(
+  // {
+  // to: phone,
+  //from: process.env.TWIL_NUMBER,
+  // body: 'Dear Customer, Feasti received your order! Currently processing it and will notify you upon acceptance by our kitchen partner. Thanks for choosing Feasti!'
+  //});
+  // await client.messages.create({
+  // to: restaurant_address.phone,
+  //from: process.env.TWIL_NUMBER,
+  // body: 'New order from Feasti received. Respond within 45 mins to accept or reject.'
+  // })
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
@@ -211,8 +196,8 @@ router.route("/").post(async function (req, res) {
 
 router.route("/checkExistingOrder/:user_id").get(async function (req, res) {
   const { user_id } = req.params
-//  res.json({ user_id })
-  const existingOrders = await Order.find({ user_id:user_id })
+  //  res.json({ user_id })
+  const existingOrders = await Order.find({ user_id: user_id })
   if (existingOrders.length > 0) {
     res.json({ isOldUser: true })
   } else {

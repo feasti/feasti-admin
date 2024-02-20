@@ -3,17 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
 
-//const timeout=require("connect-timeout");
-
-//const apicache = require('apicache')
-
-// const apicache = require('apicache')
 require("./database/database");
-
-
-// const cookieSession = require("cookie-session");
-// End of important imports
-
 
 // Start of api imports
 const admincoupon = require("./api/admin-coupon");
@@ -45,14 +35,10 @@ const version = require("./api/version_control")
 
 const app = express();
 
-//const cache = apicache.middleware;
+
 const port = process.env.PORT || 4000;
 
-//app.use(cache('5 minutes'));
-// const cache = apicache.middleware;
-//const port = process.env.PORT || 5000;
 
-// app.use(cache('5 minutes'));
 app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 app.use(express.json())
@@ -84,12 +70,6 @@ app.use("/api/stripe", stripeintent);
 app.use("/api/users", users);
 app.use("/api/version", version);
 //End of Using API
-
-// app.use(
-//   cookieSession({
-//     secret: "mysecret",
-//   })
-// );
 
 
 app.use(express.static(path.join(__dirname, "./build/")));
