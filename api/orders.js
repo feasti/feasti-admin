@@ -3,13 +3,14 @@ const moment = require("moment");
 const router = express.Router();
 const Order = require("../models/orders.model");
 const NewRestaurant = require("../models/newrest.model");
-const CurrentOrder = require("../models/currentorders.model")
 const Meals = require("../models/meals.model")
-const pdfTemplate = require("../receipt");
 const pusher = require('../utility/messaging')
 const { add, sendOrderNotificationToChef } = require('../utility/utility')
-const twilio = require('twilio')
-const client = new twilio(process.env.ACC_SID_TWIL, process.env.AUTH_TOKEN_TWIL)
+const { orderReceived, chefNewOrder } = require('../utility/constants')
+const AWS = require('aws-sdk');
+AWS.config.update({ region: "us-east-1" });
+
+
 
 
 router.route("/sendMessages/:phone").get(async (req, res) => {
@@ -174,17 +175,13 @@ router.route("/").post(async function (req, res) {
   const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
   const order = new Order({ ...orderToPlace, order_id: orderId })
   const { phone, restaurant_address } = order
-  // await client.messages.create(
-  // {
-  // to: phone,
-  //from: process.env.TWIL_NUMBER,
-  // body: 'Dear Customer, Feasti received your order! Currently processing it and will notify you upon acceptance by our kitchen partner. Thanks for choosing Feasti!'
-  //});
-  // await client.messages.create({
-  // to: restaurant_address.phone,
-  //from: process.env.TWIL_NUMBER,
-  // body: 'New order from Feasti received. Respond within 45 mins to accept or reject.'
-  // })
+  const params = {
+    Message: orderReceived,
+    PhoneNumber: phone
+  }
+  const publishTextSMS = new AWS.SNS({ apiVersion: "2010-03-31" }).publish(params).promise();
+  const messageResponse = await publishTextSMS
+  console.log(messageResponse)
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
