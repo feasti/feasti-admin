@@ -3,29 +3,15 @@ const moment = require("moment");
 const router = express.Router();
 const Order = require("../models/orders.model");
 const NewRestaurant = require("../models/newrest.model");
-const CurrentOrder = require("../models/currentorders.model")
 const Meals = require("../models/meals.model")
-const pdfTemplate = require("../receipt");
 const pusher = require('../utility/messaging')
-// const pdf = require("html-pdf");
 const { add, sendOrderNotificationToChef } = require('../utility/utility')
-const twilio = require('twilio')
-const client = new twilio(process.env.ACC_SID_TWIL, process.env.AUTH_TOKEN_TWIL)
+const { orderReceived, ChefNewOrder } = require('../utility/constants')
+const AWS = require('aws-sdk');
+AWS.config.update({ region: "us-east-1" });
 
-// router.route("/create-pdf/").post(async (req, res) => {
-//   pdf
-//     .create(pdfTemplate(req.body), {})
-//     .toFile(`${__dirname}/receipt.pdf`, (err) => {
-//       if (err) {
-//         console.log(err);
-//       }
-//       res.send(Promise.resolve());
-//     });
-// });
 
-// router.route("/fetch-pdf").get(async (req, res) => {
-//   await res.sendFile(`${__dirname}/receipt.pdf`);
-// });
+
 
 router.route("/sendMessages/:phone").get(async (req, res) => {
   const { phone } = req.params
@@ -189,17 +175,18 @@ router.route("/").post(async function (req, res) {
   const orderId = "ORDER".concat(count.toString().padStart(4, "0"))
   const order = new Order({ ...orderToPlace, order_id: orderId })
   const { phone, restaurant_address } = order
- // await client.messages.create(
-   // {
-     // to: phone,
-      //from: process.env.TWIL_NUMBER,
-     // body: 'Dear Customer, Feasti received your order! Currently processing it and will notify you upon acceptance by our kitchen partner. Thanks for choosing Feasti!'
-    //});
- // await client.messages.create({
-   // to: restaurant_address.phone,
-    //from: process.env.TWIL_NUMBER,
-   // body: 'New order from Feasti received. Respond within 45 mins to accept or reject.'
- // })
+  const params = {
+    Message: orderReceived,
+    PhoneNumber: phone
+  }
+//	const params1={
+//		Message:ChefNewOrder,
+//		PhoneNumber:restaurant_address.phone
+//	}
+  const publishTextSMS = new AWS.SNS({ apiVersion: "2010-03-31" }).publish(params).promise();
+//	await new AWS.SNS({apiVersion:"2010-03-31"}).publish(params1).promise();
+  const messageResponse = await publishTextSMS
+  console.log(messageResponse)
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
@@ -211,8 +198,8 @@ router.route("/").post(async function (req, res) {
 
 router.route("/checkExistingOrder/:user_id").get(async function (req, res) {
   const { user_id } = req.params
-//  res.json({ user_id })
-  const existingOrders = await Order.find({ user_id:user_id })
+  //  res.json({ user_id })
+  const existingOrders = await Order.find({ user_id: user_id })
   if (existingOrders.length > 0) {
     res.json({ isOldUser: true })
   } else {
@@ -338,15 +325,17 @@ router.put("/changestatus/:id", async function (req, res, next) {
   const { id } = req.params
   const { status } = req.body
   const response = await Order.findByIdAndUpdate(id, { status })
-  const updateorder = await Order.findById(id)
-  await client.messages.create(
-    {
-      to: updateorder.phone,
-      from: process.env.TWIL_NUMBER,
-      body: `${status === 'accepted' ? "Great news! Your order has been approved by our kitchen partner"
+  const updateorder = await Order.findById(id,{status})
+	
+   const params= {
+      PhoneNumber: updateorder.phone,
+      Message: `${status === 'accepted' ? "Great news! Your order has been approved by our kitchen partner"
         : "Our kitchen partner couldn't accept your order. Explore other options or contact us. Thank you!"}`
-    });
+    }
+const publishTextSMS=new AWS.SNS({apiVersion:"2010-03-31"}).publish(params).promise();
+	const messageResponse=await publishTextSMS
   res.json({
+	  messageResponse:messageResponse,
     status: 201,
     data: updateorder,
     msg: "Status updated successfully"
@@ -356,10 +345,11 @@ router.put("/changestatus/:id", async function (req, res, next) {
 
 router.put("/:id", async function (req, res, next) {
   const { id } = req.params
-  const { add_on } = await Order.findById(id)
+//	const {order_id}=req.body
+ const { add_on } = await Order.findById(id)
   let add_ons = [...add_on]
   add_ons.push(...req.body)
-  const response = await Order.findByIdAndUpdate(id, { add_on: add_ons })
+  const response = await Order.findByIdAndUpdate(id, { add_ons })
   const updateorder = await Order.findById(id)
   res.json({
     status: 201,

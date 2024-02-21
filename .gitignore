@@ -3,6 +3,6 @@ package-lock.json
 node_modules/**/
 client/node_modules/**/
 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
-
+.env
 
 blackbox.config.json
