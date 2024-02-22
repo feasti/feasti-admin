@@ -179,14 +179,15 @@ router.route("/").post(async function (req, res) {
     Message: orderReceived,
     PhoneNumber: phone
   }
-//	const params1={
-//		Message:ChefNewOrder,
-//		PhoneNumber:restaurant_address.phone
-//	}
+	const params1={
+		Message:ChefNewOrder,
+		PhoneNumber:restaurant_address.phone
+	}
   const publishTextSMS = new AWS.SNS({ apiVersion: "2010-03-31" }).publish(params).promise();
-//	await new AWS.SNS({apiVersion:"2010-03-31"}).publish(params1).promise();
+	const publishTextSMSChef= new AWS.SNS({apiVersion:"2010-03-31"}).publish(params1).promise();
   const messageResponse = await publishTextSMS
-  console.log(messageResponse)
+	const msgRes=await publishTextSMSChef
+  console.log(messageResponse,'\n',msgRes)
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
