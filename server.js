@@ -73,13 +73,20 @@ app.use("/api/version", version);
 
 
 app.use(express.static(path.join(__dirname, "./build/")));
-//app.use(express.static(path.join(__dirname, "./build/*")));
+app.use(express.static(path.join(__dirname, "./sales-admin/*")));
 
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "./build/"));
   res.setHeader('Access-Control-Allow-Origin', "*")
   res.setHeader('Access-Control-Allow-Headers', "application/json")
 });
+
+app.get("/sales-admin/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./sales-admin/"));
+  res.setHeader('Access-Control-Allow-Origin', "*")
+  res.setHeader('Access-Control-Allow-Headers', "application/json")
+});
+
 
 app.listen(port, () => {
   console.warn(`Server started on port ${port}`);

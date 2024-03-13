@@ -3,5 +3,10 @@ package-lock.json
 node_modules/**/
 client/node_modules/**/
 .env
+global-bundle.pem
+feasti_test.pem
+global-bundle.pem.1
+
+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
 
 blackbox.config.json

@@ -41,16 +41,10 @@ router.route("/:id").get(function (req, res) {
 });
 //get specific check
 
-router.put("/:id", function (req, res) {
-  let id = req.params.id;
-  console.log(req.body);
-  Checkout.findByIdAndUpdate(id, req.body, function (err, resp) {
-    if (err) {
-      res.json(err);
-    } else {
-      res.json(resp);
-    }
-  });
+router.put("/:id", async function (req, res) {
+  let { id } = req.params;
+  const res = await Checkout.findByIdAndUpdate(id, req.body);
+  res.json(res);
 });
 //update a check
 module.exports = router;

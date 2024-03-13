@@ -179,15 +179,15 @@ router.route("/").post(async function (req, res) {
     Message: orderReceived,
     PhoneNumber: phone
   }
-	const params1={
-		Message:ChefNewOrder,
-		PhoneNumber:restaurant_address.phone
-	}
+  const params1 = {
+    Message: ChefNewOrder,
+    PhoneNumber: restaurant_address.phone
+  }
   const publishTextSMS = new AWS.SNS({ apiVersion: "2010-03-31" }).publish(params).promise();
-	const publishTextSMSChef= new AWS.SNS({apiVersion:"2010-03-31"}).publish(params1).promise();
+  const publishTextSMSChef = new AWS.SNS({ apiVersion: "2010-03-31" }).publish(params1).promise();
   const messageResponse = await publishTextSMS
-	const msgRes=await publishTextSMSChef
-  console.log(messageResponse,'\n',msgRes)
+  const msgRes = await publishTextSMSChef
+  console.log(messageResponse, '\n', msgRes)
   pusher.trigger("my-channel", "my-event", {
     message: `New Order ${orderId} Placed from ${orderToPlace.user_id} to ${orderToPlace.restaurant_id}`
   })
@@ -326,17 +326,18 @@ router.put("/changestatus/:id", async function (req, res, next) {
   const { id } = req.params
   const { status } = req.body
   const response = await Order.findByIdAndUpdate(id, { status })
-  const updateorder = await Order.findById(id,{status})
-	
-   const params= {
-      PhoneNumber: updateorder.phone,
-      Message: `${status === 'accepted' ? "Great news! Your order has been approved by our kitchen partner"
+  const updateorder = await Order.findById(id, { status })
+
+  const params = {
+    PhoneNumber: updateorder.phone,
+    Message: `${status === 'accepted' ? "Great news! Your order has been approved by our kitchen partner"
+      : status === "started" ? "Your order has been started by our kitchen partner"
         : "Our kitchen partner couldn't accept your order. Explore other options or contact us. Thank you!"}`
-    }
-const publishTextSMS=new AWS.SNS({apiVersion:"2010-03-31"}).publish(params).promise();
-	const messageResponse=await publishTextSMS
+  }
+  const publishTextSMS = new AWS.SNS({ apiVersion: "2010-03-31" }).publish(params).promise();
+  const messageResponse = await publishTextSMS
   res.json({
-	  messageResponse:messageResponse,
+    messageResponse: messageResponse,
     status: 201,
     data: updateorder,
     msg: "Status updated successfully"
@@ -346,8 +347,8 @@ const publishTextSMS=new AWS.SNS({apiVersion:"2010-03-31"}).publish(params).prom
 
 router.put("/:id", async function (req, res, next) {
   const { id } = req.params
-//	const {order_id}=req.body
- const { add_on } = await Order.findById(id)
+  //	const {order_id}=req.body
+  const { add_on } = await Order.findById(id)
   let add_ons = [...add_on]
   add_ons.push(...req.body)
   const response = await Order.findByIdAndUpdate(id, { add_ons })
